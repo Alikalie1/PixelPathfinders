@@ -22,6 +22,26 @@ const recordCache = new Map();
 let currentUser = null;
 let currentRole = null;
 let activeRecordTable = "team_members";
+const sections = {
+  overview: ["Overview", "See submissions and website activity in one place."],
+  pages: ["Pages", "Choose which website pages are visible to visitors."],
+  content: ["Page text", "Edit the copy and labels shown across each page."],
+  blocks: [
+    "Content cards",
+    "Manage cards, pathways, values and agenda content.",
+  ],
+  navigation: ["Navigation", "Update the public header and footer links."],
+  settings: [
+    "Site settings",
+    "Manage the brand, contact details and social links.",
+  ],
+  records: [
+    "Website data",
+    "Manage team, projects, sessions and gallery content.",
+  ],
+  inbox: ["Form inbox", "Review contact messages and visitor applications."],
+  admins: ["Administrator access", "Invite and manage website administrators."],
+};
 
 const recordDefinitions = {
   team_members: {
@@ -90,6 +110,7 @@ function showDashboard() {
   $("#dashboardPanel").hidden = false;
   $("#accountBar").hidden = false;
   $("#roleBadge").textContent = currentRole.replace("_", " ");
+  $("#accountEmail").textContent = currentUser?.email || "";
   $$("[data-super-admin]").forEach((item) => {
     item.hidden = currentRole !== "super_admin";
   });
@@ -179,19 +200,48 @@ $("#signOutButton").addEventListener("click", async () => {
 $$("[data-tab]").forEach((button) => {
   button.addEventListener("click", async () => {
     if (button.hidden) return;
-    $$("[data-tab]").forEach((tab) =>
-      tab.classList.toggle("active", tab === button),
-    );
-    $$("[data-panel]").forEach(
-      (panel) => (panel.hidden = panel.dataset.panel !== button.dataset.tab),
-    );
-    setDashboardStatus("");
-    await loadSection(button.dataset.tab);
+    await openSection(button.dataset.tab);
   });
+});
+
+async function openSection(section) {
+  const [title, description] = sections[section] || sections.overview;
+  $$("[data-tab]").forEach((tab) =>
+    tab.classList.toggle("active", tab.dataset.tab === section),
+  );
+  $$("[data-panel]").forEach(
+    (panel) => (panel.hidden = panel.dataset.panel !== section),
+  );
+  $("#sectionTitle").textContent = title;
+  $("#sectionDescription").textContent = description;
+  setDashboardStatus("");
+  closeSidebar();
+  await loadSection(section);
+}
+
+function closeSidebar() {
+  $("#dashboardSidebar").classList.remove("open");
+  $("#sidebarBackdrop").hidden = true;
+  $("#sidebarToggle").setAttribute("aria-expanded", "false");
+}
+
+$("#sidebarToggle").addEventListener("click", () => {
+  $("#dashboardSidebar").classList.add("open");
+  $("#sidebarBackdrop").hidden = false;
+  $("#sidebarToggle").setAttribute("aria-expanded", "true");
+});
+$("#sidebarClose").addEventListener("click", closeSidebar);
+$("#sidebarBackdrop").addEventListener("click", closeSidebar);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeSidebar();
+});
+$$("[data-open-tab]").forEach((button) => {
+  button.addEventListener("click", () => openSection(button.dataset.openTab));
 });
 
 async function loadSection(section) {
   if (section === "overview") return loadOverview();
+  if (section === "pages") return loadPagesPanel();
   if (section === "content") return loadContentEditor();
   if (section === "blocks") return loadBlocks();
   if (section === "navigation") return loadNavigation();
@@ -200,6 +250,61 @@ async function loadSection(section) {
   if (section === "inbox") return loadInbox();
   if (section === "admins" && currentRole === "super_admin")
     return loadAdmins();
+}
+
+async function uploadImageIntoField(input, file) {
+  if (!file.type.startsWith("image/")) {
+    setDashboardStatus("Choose an image file to upload.", "error");
+    input.value = "";
+    return;
+  }
+  if (file.size > 8 * 1024 * 1024) {
+    setDashboardStatus("Images must be 8 MB or smaller.", "error");
+    input.value = "";
+    return;
+  }
+  const form = input.closest("form");
+  const urlField = form?.elements.namedItem(input.dataset.imageUploadFor);
+  if (!(urlField instanceof HTMLInputElement)) {
+    setDashboardStatus("The image URL field was not found.", "error");
+    input.value = "";
+    return;
+  }
+  const extension =
+    file.name
+      .split(".")
+      .pop()
+      ?.toLowerCase()
+      .replace(/[^a-z0-9]/g, "") || "img";
+  const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+  input.disabled = true;
+  setDashboardStatus("Uploading image to Supabase Storage…");
+  const { data, error } = await client.storage
+    .from("media")
+    .upload(uniqueName, file, {
+      cacheControl: "3600",
+      contentType: file.type,
+      upsert: false,
+    });
+  input.disabled = false;
+  if (error) {
+    console.error("Could not upload website image:", error);
+    setDashboardStatus(
+      "Image upload failed. Check the media bucket and admin upload policy.",
+      "error",
+    );
+    input.value = "";
+    return;
+  }
+  const { data: publicUrl } = client.storage
+    .from("media")
+    .getPublicUrl(data.path);
+  urlField.value = publicUrl.publicUrl;
+  setDashboardStatus(
+    "Image uploaded. Save the form to publish its URL.",
+    "success",
+  );
+  input.value = "";
 }
 
 async function loadOverview() {
@@ -248,18 +353,85 @@ async function loadPages(select) {
   return data;
 }
 
+async function loadPagesPanel() {
+  const { data, error } = await client
+    .from("site_pages")
+    .select("slug, title, description, is_published")
+    .order("title");
+  if (error) {
+    console.error("Could not load website pages:", error);
+    setDashboardStatus("Could not load website pages.", "error");
+    return;
+  }
+  data.forEach((page) => pageTitles.set(page.slug, page.title));
+  $("#pagesList").innerHTML = data
+    .map(
+      (page) => `<article class="record-card page-record">
+        <div>
+          <h3>${escapeHtml(page.title)}</h3>
+          <p>${escapeHtml(page.description || page.slug + ".html")}</p>
+        </div>
+        <div class="record-actions">
+          <span class="page-state ${page.is_published ? "published" : "hidden-page"}">${page.is_published ? "Published" : "Hidden from visitors"}</span>
+          <button class="button ${page.is_published ? "button-quiet" : "button-primary"}" type="button" data-toggle-page="${escapeHtml(page.slug)}" data-published="${page.is_published}" title="${page.is_published ? "Hide this page from public visitors without deleting its content" : "Make this page visible to public visitors"}">${page.is_published ? "Unpublish page" : "Publish page"}</button>
+        </div>
+      </article>`,
+    )
+    .join("");
+}
+
+$("#pagesList").addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-toggle-page]");
+  if (!button) return;
+  const isPublished = button.dataset.published === "true";
+  const action = isPublished ? "unpublish" : "publish";
+  if (
+    !confirm(
+      `Are you sure you want to ${action} this page? Its saved content will not be deleted.`,
+    )
+  )
+    return;
+  button.disabled = true;
+  const { error } = await client
+    .from("site_pages")
+    .update({ is_published: !isPublished })
+    .eq("slug", button.dataset.togglePage);
+  button.disabled = false;
+  if (error) {
+    console.error(`Could not ${action} page:`, error);
+    setDashboardStatus(`Could not ${action} this page.`, "error");
+    return;
+  }
+  setDashboardStatus(
+    isPublished
+      ? "Page is now hidden from visitors."
+      : "Page is now published.",
+    "success",
+  );
+  await loadPagesPanel();
+});
+
 async function loadContentEditor() {
   try {
     const select = $("#contentPage");
     if (!select.options.length) {
       await loadPages(select);
-      select.addEventListener("change", loadContentRows);
+      select.addEventListener("change", () => {
+        updatePagePreview();
+        loadContentRows();
+      });
     }
+    updatePagePreview();
     await loadContentRows();
   } catch (error) {
     console.error("Could not load editable page content:", error);
     setDashboardStatus("Could not load page content.", "error");
   }
+}
+
+function updatePagePreview() {
+  const slug = $("#contentPage").value || "index";
+  $("#pagePreviewLink").href = `/${slug}.html`;
 }
 
 async function loadContentRows() {
@@ -334,13 +506,14 @@ async function loadBlocks() {
 function renderBlockCard(block) {
   recordCache.set(`block:${block.id}`, block);
   return `<article class="record-card">
+    ${block.image_url ? `<img class="record-image" src="${escapeHtml(block.image_url)}" alt="" loading="lazy">` : ""}
     <h3>${escapeHtml(block.title)}</h3>
     <p>${escapeHtml(pageTitles.get(block.page_slug) || block.page_slug)} · ${escapeHtml(block.section_key)} · order ${escapeHtml(block.sort_order)}</p>
     <p>${escapeHtml(block.body)}</p>
     <p>${block.is_published ? "Published" : "Hidden"}</p>
     <div class="record-actions">
-      <button class="button button-quiet" type="button" data-edit-block="${escapeHtml(block.id)}">Edit</button>
-      <button class="button button-danger" type="button" data-delete-block="${escapeHtml(block.id)}">Delete</button>
+      <button class="button button-quiet" type="button" data-edit-block="${escapeHtml(block.id)}" title="Load this card into the editor so you can change and save it">Edit card</button>
+      <button class="button button-danger" type="button" data-delete-block="${escapeHtml(block.id)}" title="Permanently remove this card from Supabase and the website">Delete card</button>
     </div>
   </article>`;
 }
@@ -382,6 +555,13 @@ $("#blockForm").addEventListener("submit", async (event) => {
   await loadBlocks();
 });
 
+$("#blockForm").addEventListener("change", async (event) => {
+  const upload = event.target.closest("[data-image-upload-for]");
+  const file = upload?.files?.[0];
+  if (!upload || !file) return;
+  await uploadImageIntoField(upload, file);
+});
+
 $("#blocksList").addEventListener("click", async (event) => {
   const edit = event.target.closest("[data-edit-block]");
   const remove = event.target.closest("[data-delete-block]");
@@ -399,7 +579,12 @@ $("#blocksList").addEventListener("click", async (event) => {
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   if (remove) {
-    if (!confirm("Delete this content card?")) return;
+    if (
+      !confirm(
+        "Permanently delete this content card from Supabase and the public website?",
+      )
+    )
+      return;
     const { error } = await client
       .from("content_blocks")
       .delete()
@@ -433,8 +618,8 @@ async function loadNavigation() {
         <p>${escapeHtml(item.location)} · ${escapeHtml(item.href)} · order ${escapeHtml(item.sort_order)}</p>
         <p>${item.is_active ? "Visible" : "Hidden"}${item.is_cta ? " · Button style" : ""}</p>
         <div class="record-actions">
-          <button class="button button-quiet" type="button" data-edit-navigation="${escapeHtml(item.id)}">Edit</button>
-          <button class="button button-danger" type="button" data-delete-navigation="${escapeHtml(item.id)}">Delete</button>
+          <button class="button button-quiet" type="button" data-edit-navigation="${escapeHtml(item.id)}" title="Load this link into the editor so you can change and save it">Edit link</button>
+          <button class="button button-danger" type="button" data-delete-navigation="${escapeHtml(item.id)}" title="Permanently remove this link from the public menu">Delete link</button>
         </div>
       </article>`;
     })
@@ -566,7 +751,10 @@ function buildRecordFields(table) {
         type === "textarea"
           ? `<textarea name="${key}" rows="3"${required ? " required" : ""}></textarea>`
           : `<input name="${key}" type="${type}"${required ? " required" : ""}>`;
-      return `<label>${escapeHtml(label)}${control}</label>`;
+      const upload = ["photo_url", "image_url"].includes(key)
+        ? `<label class="upload-field wide">Upload image<input type="file" accept="image/*" data-image-upload-for="${key}"><small>Upload an image (up to 8 MB) to Supabase Storage. Saving the item publishes this image URL.</small></label>`
+        : "";
+      return `<label>${escapeHtml(label)}${control}</label>${upload}`;
     })
     .join("");
 }
@@ -607,12 +795,13 @@ async function loadRecords() {
           )
           .join("");
         return `<article class="record-card">
+        ${record.image_url || record.photo_url ? `<img class="record-image" src="${escapeHtml(record.image_url || record.photo_url)}" alt="" loading="lazy">` : ""}
         <h3>${escapeHtml(title)}</h3>
         ${fields}
         <p>${record.is_published ? "Published" : "Hidden"}</p>
         <div class="record-actions">
-          <button class="button button-quiet" type="button" data-edit-record="${escapeHtml(record.id)}">Edit</button>
-          <button class="button button-danger" type="button" data-delete-record="${escapeHtml(record.id)}">Delete</button>
+          <button class="button button-quiet" type="button" data-edit-record="${escapeHtml(record.id)}" title="Load this item into the form so you can change and save it">Edit item</button>
+          <button class="button button-danger" type="button" data-delete-record="${escapeHtml(record.id)}" title="Permanently delete this item from Supabase and the public website">Delete item</button>
         </div>
       </article>`;
       })
@@ -624,6 +813,13 @@ $("#recordType").addEventListener("change", () => {
   form.reset();
   form.elements.id.value = "";
   loadRecords();
+});
+
+$("#recordForm").addEventListener("change", async (event) => {
+  const upload = event.target.closest("[data-image-upload-for]");
+  const file = upload?.files?.[0];
+  if (!upload || !file) return;
+  await uploadImageIntoField(upload, file);
 });
 
 $("#recordForm").addEventListener("submit", async (event) => {
@@ -677,7 +873,12 @@ $("#recordList").addEventListener("click", async (event) => {
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   if (remove) {
-    if (!confirm("Delete this website record?")) return;
+    if (
+      !confirm(
+        "Permanently delete this item from Supabase and the public website?",
+      )
+    )
+      return;
     const { error } = await client
       .from(activeRecordTable)
       .delete()
@@ -721,7 +922,7 @@ async function loadInbox() {
         ${
           table === "profiles"
             ? ""
-            : `<div class="record-actions"><button class="button button-danger" type="button" data-delete-submission="${escapeHtml(record.id)}">Delete submission</button></div>`
+            : `<div class="record-actions"><button class="button button-danger" type="button" data-delete-submission="${escapeHtml(record.id)}" title="Permanently delete this submission from Supabase">Delete submission</button></div>`
         }
       </article>`;
       })
@@ -730,7 +931,8 @@ async function loadInbox() {
 
 $("#inboxList").addEventListener("click", async (event) => {
   const button = event.target.closest("[data-delete-submission]");
-  if (!button || !confirm("Permanently delete this submission?")) return;
+  if (!button || !confirm("Permanently delete this submission from Supabase?"))
+    return;
   const table = $("#inboxType").value;
   const { error } = await client
     .from(table)

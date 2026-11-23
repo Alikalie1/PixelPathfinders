@@ -17,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20261123" />
+    <link rel="stylesheet" href="style.css?v=20261123-1" />
   </head>
   <body>
     <div id="bar"></div>
@@ -49,6 +49,302 @@
           </p>
         </div>
       </section>
+      <section class="wrap sec member-area" id="member-account">
+        <div class="member-heading">
+          <div>
+            <p class="member-eyebrow">MEMBER SPACE</p>
+            <h2 data-cms-key="member.heading">Your member dashboard</h2>
+            <p class="mut" data-cms-key="member.intro">
+              Create an account or log in to manage your membership and see your
+              registrations.
+            </p>
+          </div>
+          <a class="btn sm member-apply-link" href="#applications"
+            >Explore sessions and applications</a
+          >
+        </div>
+        <div id="memberAuthPanel" class="member-auth-card">
+          <div
+            class="member-auth-tabs"
+            role="tablist"
+            aria-label="Member account"
+          >
+            <button
+              class="member-tab active"
+              id="t1"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="rf"
+              data-cms-key="form.register_tab"
+            >
+              Create account
+            </button>
+            <button
+              class="member-tab"
+              id="t2"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="lf"
+              tabindex="-1"
+              data-cms-key="form.login_tab"
+            >
+              Log in
+            </button>
+          </div>
+          <div class="member-auth-body">
+            <div class="member-auth-copy">
+              <span class="member-icon" aria-hidden="true"
+                ><i class="fa-solid fa-user-shield"></i
+              ></span>
+              <h3 id="memberAuthTitle">Join the Pixel Pathfinders community</h3>
+              <p id="memberAuthDescription">
+                Create a free account to keep your profile and track your
+                session registrations and applications.
+              </p>
+              <p class="member-auth-note">
+                Your information is private and is only shown to you and
+                authorised website administrators.
+              </p>
+            </div>
+            <div class="member-auth-form">
+              <form
+                id="rf"
+                class="form member-form"
+                role="tabpanel"
+                aria-labelledby="t1"
+              >
+                <label>
+                  <span data-cms-key="form.full_name">Full name</span>
+                  <input name="name" autocomplete="name" required />
+                </label>
+                <label>
+                  <span data-cms-key="form.phone">Phone or WhatsApp</span>
+                  <input name="phone" type="tel" autocomplete="tel" />
+                </label>
+                <label>
+                  <span data-cms-key="form.email">Email</span>
+                  <input
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    required
+                  />
+                </label>
+                <label>
+                  <span data-cms-key="form.password">Password</span>
+                  <span class="member-password-control">
+                    <input
+                      name="pw"
+                      type="password"
+                      autocomplete="new-password"
+                      minlength="6"
+                      required
+                    />
+                    <button
+                      class="member-password-toggle"
+                      type="button"
+                      aria-label="Show password"
+                      aria-pressed="false"
+                      title="Show or hide your password"
+                    >
+                      <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                    </button>
+                  </span>
+                  <small>Use at least 6 characters.</small>
+                </label>
+                <label>
+                  <span data-cms-key="form.mode">Preferred session format</span>
+                  <select name="mode">
+                    <option value="Virtual" data-cms-key="form.online">
+                      Online
+                    </option>
+                    <option value="Physical" data-cms-key="form.in_person">
+                      In person
+                    </option>
+                  </select>
+                </label>
+                <label class="ck member-consent">
+                  <input type="checkbox" required />
+                  <span>
+                    <span data-cms-key="form.account_consent_prefix"
+                      >I accept the</span
+                    >
+                    <a href="terms.html" data-cms-key="form.terms_short"
+                      >Terms</a
+                    >
+                    <span data-cms-key="form.and">and</span>
+                    <a href="privacy.html" data-cms-key="form.privacy_link"
+                      >Privacy Policy</a
+                    >
+                  </span>
+                </label>
+                <button
+                  class="btn member-submit"
+                  type="submit"
+                  data-cms-key="form.create_account"
+                >
+                  Create my free account
+                </button>
+              </form>
+              <form
+                id="lf"
+                class="form member-form"
+                role="tabpanel"
+                aria-labelledby="t2"
+                hidden
+              >
+                <label>
+                  <span data-cms-key="form.email">Email</span>
+                  <input
+                    name="email"
+                    type="email"
+                    autocomplete="username"
+                    required
+                  />
+                </label>
+                <label>
+                  <span data-cms-key="form.password">Password</span>
+                  <span class="member-password-control">
+                    <input
+                      name="pw"
+                      type="password"
+                      autocomplete="current-password"
+                      required
+                    />
+                    <button
+                      class="member-password-toggle"
+                      type="button"
+                      aria-label="Show password"
+                      aria-pressed="false"
+                      title="Show or hide your password"
+                    >
+                      <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                    </button>
+                  </span>
+                </label>
+                <button
+                  class="btn member-submit"
+                  type="submit"
+                  data-cms-key="form.login"
+                >
+                  Log in to my account
+                </button>
+              </form>
+            </div>
+          </div>
+          <p id="ms" class="member-status" role="status" aria-live="polite"></p>
+        </div>
+
+        <div id="memberDashboard" class="member-dashboard" hidden>
+          <div class="member-dashboard-heading">
+            <div>
+              <p class="member-eyebrow">YOUR ACCOUNT</p>
+              <h3 id="memberWelcome">Welcome</h3>
+              <p id="memberEmail" class="mut"></p>
+            </div>
+            <button class="btn sm member-signout" id="lo" type="button">
+              <i
+                class="fa-solid fa-arrow-right-from-bracket"
+                aria-hidden="true"
+              ></i>
+              Log out
+            </button>
+          </div>
+          <p
+            id="memberDashboardStatus"
+            class="member-status status"
+            role="status"
+            aria-live="polite"
+          ></p>
+          <div class="member-summary">
+            <article class="member-summary-card">
+              <span>Member number</span>
+              <strong id="memberNumber">—</strong>
+            </article>
+            <article class="member-summary-card">
+              <span>Session registrations</span>
+              <strong id="memberRegistrationCount">0</strong>
+            </article>
+            <article class="member-summary-card">
+              <span>Applications sent</span>
+              <strong id="memberApplicationCount">0</strong>
+            </article>
+          </div>
+          <div class="member-dashboard-grid">
+            <section class="member-dashboard-card">
+              <h3>Your profile</h3>
+              <p class="mut">
+                Keep your contact details and session preference up to date.
+              </p>
+              <form id="memberProfileForm" class="form member-form">
+                <label
+                  >Full name<input
+                    name="full_name"
+                    autocomplete="name"
+                    required
+                /></label>
+                <label
+                  >Phone or WhatsApp<input
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                /></label>
+                <label
+                  >Preferred session format<select name="mode">
+                    <option value="Virtual">Online</option>
+                    <option value="Physical">In person</option>
+                  </select></label
+                >
+                <button class="btn member-submit" type="submit">
+                  Save my profile
+                </button>
+              </form>
+              <p
+                id="memberProfileStatus"
+                class="member-activity-status"
+                role="status"
+                aria-live="polite"
+              ></p>
+            </section>
+            <section class="member-dashboard-card">
+              <h3>Your activity</h3>
+              <p class="mut">
+                Your recent registrations and volunteer or partner applications.
+              </p>
+              <p
+                id="memberActivityStatus"
+                class="member-activity-status"
+                role="status"
+                aria-live="polite"
+              ></p>
+              <div class="member-activity-columns">
+                <div>
+                  <h4>Session registrations</h4>
+                  <div
+                    id="memberRegistrations"
+                    class="member-activity-list"
+                  ></div>
+                </div>
+                <div>
+                  <h4>Applications</h4>
+                  <div
+                    id="memberApplications"
+                    class="member-activity-list"
+                  ></div>
+                </div>
+              </div>
+            </section>
+          </div>
+          <p class="member-dashboard-footer">
+            Want to join a session or offer support?
+            <a href="#applications">Browse registration and application forms</a
+            >.
+          </p>
+        </div>
+      </section>
+
       <section class="wrap sec registration" id="applications">
         <h2 data-cms-key="applications.heading">Register or apply</h2>
         <p class="mut" data-cms-key="applications.intro">
@@ -354,75 +650,6 @@
           ></p>
         </form>
       </section>
-
-      <section class="wrap sec" id="member-account">
-        <h2 data-cms-key="member.heading">Member account</h2>
-        <p class="mut" data-cms-key="member.intro">
-          Create an account or log in to manage your membership.
-        </p>
-        <div class="row">
-          <button
-            class="btn sm on"
-            id="t1"
-            type="button"
-            data-cms-key="form.register_tab"
-          >
-            Register
-          </button>
-          <button
-            class="btn sm"
-            id="t2"
-            type="button"
-            data-cms-key="form.login_tab"
-          >
-            Log in
-          </button>
-        </div>
-        <form id="rf" class="form">
-          <label
-            ><span data-cms-key="form.full_name">Full name</span
-            ><input name="name" required /></label
-          ><label
-            ><span data-cms-key="form.phone">Phone or WhatsApp</span
-            ><input name="phone" /></label
-          ><label
-            ><span data-cms-key="form.email">Email</span
-            ><input name="email" type="email" required /></label
-          ><label
-            ><span data-cms-key="form.password">Password</span
-            ><input name="pw" type="password" minlength="6" required /></label
-          ><label
-            ><span data-cms-key="form.mode">Mode</span
-            ><select name="mode">
-              <option value="Virtual" data-cms-key="form.online">Online</option>
-              <option value="Physical" data-cms-key="form.in_person">
-                In person
-              </option>
-            </select></label
-          ><label class="ck"
-            ><input type="checkbox" required />
-            <span data-cms-key="form.account_consent_prefix">I accept the</span>
-            <a href="terms.html" data-cms-key="form.terms_short">Terms</a>
-            <span data-cms-key="form.and">and</span>
-            <a href="privacy.html" data-cms-key="form.privacy_link"
-              >Privacy Policy</a
-            ></label
-          ><button class="btn" data-cms-key="form.create_account">
-            Create account
-          </button>
-        </form>
-        <form id="lf" class="form" hidden>
-          <label
-            ><span data-cms-key="form.email">Email</span
-            ><input name="email" type="email" required /></label
-          ><label
-            ><span data-cms-key="form.password">Password</span
-            ><input name="pw" type="password" required /></label
-          ><button class="btn" data-cms-key="form.login">Log in</button>
-        </form>
-        <p id="ms" role="status"></p>
-        <button class="btn ghost" id="lo" hidden>Log out</button>
-      </section>
     </main>
     <footer class="ft">
       <div class="wrap fg">
@@ -521,7 +748,7 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="app.js?v=20261123-4"></script>
+    <script src="app.js?v=20261123-5"></script>
     <script>
       auth();
       registrationForms();

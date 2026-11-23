@@ -6,6 +6,7 @@ const $$ = (selector, root = document) =>
   Array.from(root.querySelectorAll(selector));
 const cmsValues = new Map();
 const cmsBlocks = new Map();
+let currentMember = null;
 const esc = (value) =>
   String(value ?? "").replace(
     /[&<>"]/g,
@@ -479,59 +480,321 @@ function form(id, tb) {
   };
 }
 function auth() {
-  const m = $("#ms"),
-    sw = (a) => {
-      $("#rf").hidden = !a;
-      $("#lf").hidden = a;
-      $("#t1").classList.toggle("on", a);
-      $("#t2").classList.toggle("on", !a);
-    };
-  $("#t1").onclick = () => sw(true);
-  $("#t2").onclick = () => sw(false);
-  if (db)
-    db.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        m.textContent =
-          "Welcome, " +
-          (data.user.user_metadata.full_name || data.user.email) +
-          "! You are logged in.";
-        $("#lo").hidden = false;
+  const message = $("#ms");
+  const authPanel = $("#memberAuthPanel");
+  const memberDashboard = $("#memberDashboard");
+  const setMessage = (text, type = "") => {
+    message.textContent = text;
+    message.className = `member-status status ${type}`.trim();
+  };
+  const switchForm = (showRegister) => {
+    $("#rf").hidden = !showRegister;
+    $("#lf").hidden = showRegister;
+    $("#t1").classList.toggle("active", showRegister);
+    $("#t2").classList.toggle("active", !showRegister);
+    $("#t1").setAttribute("aria-selected", String(showRegister));
+    $("#t2").setAttribute("aria-selected", String(!showRegister));
+    $("#t1").tabIndex = showRegister ? 0 : -1;
+    $("#t2").tabIndex = showRegister ? -1 : 0;
+    $("#memberAuthTitle").textContent = showRegister
+      ? "Join the Pixel Pathfinders community"
+      : "Welcome back";
+    $("#memberAuthDescription").textContent = showRegister
+      ? "Create a free account to keep your profile and track your session registrations and applications."
+      : "Log in to update your profile and see your recent registrations and applications.";
+    setMessage("");
+  };
+  const showSignedIn = async (user) => {
+    currentMember = user;
+    authPanel.hidden = true;
+    memberDashboard.hidden = false;
+    $("#memberWelcome").textContent =
+      user.user_metadata?.full_name || user.email?.split("@")[0] || "Member";
+    $("#memberEmail").textContent = user.email || "";
+    $("#memberProfileStatus").textContent = "";
+    $("#memberActivityStatus").textContent = "";
+    $("#memberDashboardStatus").textContent = "";
+    await loadMemberDashboard(user);
+  };
+
+  $("#t1").addEventListener("click", () => switchForm(true));
+  $("#t2").addEventListener("click", () => switchForm(false));
+  $$(".member-password-toggle").forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const password = toggle
+        .closest(".member-password-control")
+        .querySelector("input");
+      const showPassword = password.type === "password";
+      password.type = showPassword ? "text" : "password";
+      toggle.setAttribute(
+        "aria-label",
+        showPassword ? "Hide password" : "Show password",
+      );
+      toggle.setAttribute("aria-pressed", String(showPassword));
+      const icon = $("i", toggle);
+      icon.classList.toggle("fa-eye", !showPassword);
+      icon.classList.toggle("fa-eye-slash", showPassword);
+    });
+  });
+
+  $("#rf").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!db)
+      return setMessage(
+        "Account registration is unavailable right now.",
+        "err",
+      );
+    const form = event.currentTarget;
+    const button = $('button[type="submit"]', form);
+    const originalLabel = button.textContent;
+    const fields = Object.fromEntries(new FormData(form));
+    button.disabled = true;
+    button.textContent = "Creating account…";
+    setMessage("Creating your account…");
+    try {
+      const { data, error } = await db.auth.signUp({
+        email: fields.email,
+        password: fields.pw,
+        options: {
+          data: {
+            full_name: fields.name,
+            phone: fields.phone,
+            mode: fields.mode,
+          },
+        },
+      });
+      if (error) throw error;
+      if (data.session?.user) {
+        await showSignedIn(data.session.user);
+        $("#memberDashboardStatus").textContent =
+          "Your account is ready. Welcome to Pixel Pathfinders!";
+        $("#memberDashboardStatus").className = "member-status status ok";
+      } else {
+        form.reset();
+        switchForm(false);
+        setMessage(
+          "Account created. Check your email for the confirmation link, then log in here.",
+          "ok",
+        );
       }
-    });
-  $("#lo").onclick = async () => {
-    await db.auth.signOut();
-    location.reload();
-  };
-  $("#rf").onsubmit = async (e) => {
-    e.preventDefault();
-    if (!db) {
-      m.textContent = "Connect Supabase first (js/config.js).";
+    } catch (error) {
+      console.error("Could not create member account:", error);
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not create your account. Please try again.",
+        "err",
+      );
+    } finally {
+      button.disabled = false;
+      button.textContent = originalLabel;
+    }
+  });
+
+  $("#lf").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!db) return setMessage("Sign in is unavailable right now.", "err");
+    const form = event.currentTarget;
+    const button = $('button[type="submit"]', form);
+    const originalLabel = button.textContent;
+    const fields = Object.fromEntries(new FormData(form));
+    button.disabled = true;
+    button.textContent = "Signing in…";
+    setMessage("Signing in…");
+    try {
+      const { data, error } = await db.auth.signInWithPassword({
+        email: fields.email,
+        password: fields.pw,
+      });
+      if (error) throw error;
+      await showSignedIn(data.user);
+      $("#memberDashboardStatus").textContent = "You are signed in.";
+      $("#memberDashboardStatus").className = "member-status status ok";
+    } catch (error) {
+      console.error("Could not sign in member:", error);
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not sign in. Check your details and try again.",
+        "err",
+      );
+    } finally {
+      button.disabled = false;
+      button.textContent = originalLabel;
+    }
+  });
+
+  $("#memberProfileForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!db || !currentMember) return;
+    const form = event.currentTarget;
+    const button = $('button[type="submit"]', form);
+    const originalLabel = button.textContent;
+    const fields = Object.fromEntries(new FormData(form));
+    button.disabled = true;
+    button.textContent = "Saving…";
+    const profileStatus = $("#memberProfileStatus");
+    profileStatus.textContent = "";
+    try {
+      const { error } = await db
+        .from("profiles")
+        .update({
+          full_name: String(fields.full_name || "").trim(),
+          phone: String(fields.phone || "").trim() || null,
+          mode: fields.mode,
+        })
+        .eq("id", currentMember.id);
+      if (error) throw error;
+      $("#memberWelcome").textContent = String(fields.full_name).trim();
+      currentMember.user_metadata = {
+        ...currentMember.user_metadata,
+        full_name: String(fields.full_name).trim(),
+        phone: String(fields.phone || "").trim(),
+        mode: fields.mode,
+      };
+      profileStatus.textContent = "Your profile has been saved.";
+      profileStatus.className = "member-activity-status ok";
+    } catch (error) {
+      console.error("Could not save member profile:", error);
+      profileStatus.textContent =
+        "Could not save your profile. Please try again.";
+      profileStatus.className = "member-activity-status err";
+    } finally {
+      button.disabled = false;
+      button.textContent = originalLabel;
+    }
+  });
+
+  $("#lo").addEventListener("click", async () => {
+    if (!db) return;
+    const button = $("#lo");
+    button.disabled = true;
+    const { error } = await db.auth.signOut();
+    button.disabled = false;
+    if (error) {
+      console.error("Could not sign out member:", error);
+      $("#memberActivityStatus").textContent =
+        "Could not sign out. Please try again.";
+      $("#memberActivityStatus").className = "member-activity-status err";
       return;
     }
-    const f = Object.fromEntries(new FormData(e.target));
-    const { error } = await db.auth.signUp({
-      email: f.email,
-      password: f.pw,
-      options: { data: { full_name: f.name, phone: f.phone, mode: f.mode } },
+    currentMember = null;
+    memberDashboard.hidden = true;
+    authPanel.hidden = false;
+    $("#memberDashboardStatus").textContent = "";
+    $("#memberProfileForm").reset();
+    $("#rf").reset();
+    $("#lf").reset();
+    switchForm(false);
+    setMessage("You have been signed out.", "ok");
+  });
+
+  switchForm(true);
+  if (!db) {
+    setMessage("Connect Supabase to create or access a member account.", "err");
+    return;
+  }
+  db.auth
+    .getSession()
+    .then(({ data, error }) => {
+      if (error) throw error;
+      if (data.session?.user) showSignedIn(data.session.user);
+    })
+    .catch((error) => {
+      console.error("Could not restore member session:", error);
+      setMessage("Could not restore your sign-in. Please log in again.", "err");
     });
-    m.textContent = error
-      ? error.message
-      : "Account created! Check your email to confirm, then log in.";
-  };
-  $("#lf").onsubmit = async (e) => {
-    e.preventDefault();
-    if (!db) {
-      m.textContent = "Connect Supabase first (js/config.js).";
-      return;
-    }
-    const f = Object.fromEntries(new FormData(e.target));
-    const { error } = await db.auth.signInWithPassword({
-      email: f.email,
-      password: f.pw,
-    });
-    m.textContent = error ? error.message : "Logged in!";
-    if (!error) location.reload();
-  };
+}
+
+async function loadMemberDashboard(user) {
+  const [profileResult, registrationsResult, applicationsResult] =
+    await Promise.all([
+      db
+        .from("profiles")
+        .select("full_name, phone, mode, member_no")
+        .eq("id", user.id)
+        .maybeSingle(),
+      db
+        .from("participants")
+        .select("id, session_id, mode, created_at", { count: "exact" })
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5),
+      db
+        .from("volunteers")
+        .select("id, role, organisation, created_at", { count: "exact" })
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5),
+    ]);
+
+  const profileStatus = $("#memberProfileStatus");
+  if (profileResult.error) {
+    console.error("Could not load member profile:", profileResult.error);
+    profileStatus.textContent =
+      "Your profile could not be loaded. Run the latest member dashboard migration.";
+    profileStatus.className = "member-activity-status err";
+  } else if (profileResult.data) {
+    const form = $("#memberProfileForm");
+    form.elements.full_name.value = profileResult.data.full_name || "";
+    form.elements.phone.value = profileResult.data.phone || "";
+    form.elements.mode.value = profileResult.data.mode || "Virtual";
+    $("#memberNumber").textContent = profileResult.data.member_no || "—";
+    if (profileResult.data.full_name)
+      $("#memberWelcome").textContent = profileResult.data.full_name;
+  }
+
+  const activityErrors = [];
+  $("#memberRegistrationCount").textContent = registrationsResult.count ?? "—";
+  if (registrationsResult.error) {
+    console.error(
+      "Could not load member registrations:",
+      registrationsResult.error,
+    );
+    activityErrors.push(
+      "Your registrations could not be loaded. Run the latest member dashboard migration.",
+    );
+  } else {
+    $("#memberRegistrations").innerHTML = registrationsResult.data.length
+      ? registrationsResult.data
+          .map(
+            (item) => `<article class="member-activity-item">
+              <strong>Session registration</strong>
+              <span>${item.session_id && item.session_id !== "any" ? "Selected session" : "Any upcoming session"} · ${escapeHtml(item.mode || "Format not selected")}</span>
+              <small>${escapeHtml(new Date(item.created_at).toLocaleDateString())}</small>
+            </article>`,
+          )
+          .join("")
+      : '<p class="member-empty">Your session registrations will appear here.</p>';
+  }
+
+  $("#memberApplicationCount").textContent = applicationsResult.count ?? "—";
+  if (applicationsResult.error) {
+    console.error(
+      "Could not load member applications:",
+      applicationsResult.error,
+    );
+    activityErrors.push(
+      "Your applications could not be loaded. Run the latest member dashboard migration.",
+    );
+  } else {
+    $("#memberApplications").innerHTML = applicationsResult.data.length
+      ? applicationsResult.data
+          .map(
+            (item) => `<article class="member-activity-item">
+              <strong>${item.role === "partner" ? "Partner application" : "Volunteer application"}</strong>
+              <span>${escapeHtml(item.organisation || "Application received")}</span>
+              <small>${escapeHtml(new Date(item.created_at).toLocaleDateString())}</small>
+            </article>`,
+          )
+          .join("")
+      : '<p class="member-empty">Your volunteer and partner applications will appear here.</p>';
+  }
+  const activityStatus = $("#memberActivityStatus");
+  activityStatus.textContent = activityErrors.join(" ");
+  activityStatus.className = activityErrors.length
+    ? "member-activity-status err"
+    : "member-activity-status";
 }
 
 const volunteerAreas = [
@@ -680,6 +943,7 @@ function registrationForms() {
     const values = new FormData(participantForm);
     submitRegistration(event, participantForm, "participants", {
       full_name: String(values.get("full_name") || "").trim(),
+      user_id: currentMember?.id || null,
       phone: String(values.get("phone") || "").trim(),
       email: String(values.get("email") || "").trim() || null,
       age_group: values.get("age_group") || null,
@@ -696,6 +960,7 @@ function registrationForms() {
     const isPartner = values.get("role") === "partner";
     submitRegistration(event, volunteerForm, "volunteers", {
       role: isPartner ? "partner" : "volunteer",
+      user_id: currentMember?.id || null,
       full_name: String(values.get("full_name") || "").trim(),
       organisation: String(values.get("organisation") || "").trim() || null,
       phone: String(values.get("phone") || "").trim(),
@@ -752,6 +1017,7 @@ async function submitRegistration(event, formElement, table, row) {
       const selectedRole = $('input[name="role"]:checked', formElement);
       if (selectedRole) selectedRole.dispatchEvent(new Event("change"));
     }
+    if (currentMember) await loadMemberDashboard(currentMember);
   } catch (error) {
     console.error(`Could not submit ${table} form:`, error);
     showError(

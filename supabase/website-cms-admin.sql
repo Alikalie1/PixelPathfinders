@@ -109,6 +109,7 @@ create table if not exists public.messages (
 
 create table if not exists public.participants (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
   full_name text not null,
   phone text not null,
   email text,
@@ -123,6 +124,7 @@ create table if not exists public.participants (
 
 create table if not exists public.volunteers (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
   role text not null check (role in ('volunteer', 'partner')),
   full_name text not null,
   organisation text,
@@ -142,6 +144,10 @@ alter table public.team_members add column if not exists is_published boolean no
 alter table public.projects add column if not exists is_published boolean not null default true;
 alter table public.gallery_items add column if not exists is_published boolean not null default true;
 alter table public.sessions add column if not exists is_published boolean not null default true;
+alter table public.participants
+  add column if not exists user_id uuid references auth.users(id) on delete set null;
+alter table public.volunteers
+  add column if not exists user_id uuid references auth.users(id) on delete set null;
 
 create table if not exists public.admin_roles (
   user_id uuid primary key references auth.users(id) on delete cascade,
@@ -267,7 +273,9 @@ alter table public.messages enable row level security;
 alter table public.participants enable row level security;
 alter table public.volunteers enable row level security;
 
+revoke insert, update, delete on public.profiles from anon, authenticated;
 grant select on public.profiles to authenticated;
+grant update (full_name, phone, mode) on public.profiles to authenticated;
 grant select on public.admin_roles to authenticated;
 grant select on public.site_pages, public.site_content, public.site_settings,
   public.site_navigation_items, public.content_blocks to anon, authenticated;
@@ -287,9 +295,14 @@ drop policy if exists "own profile read" on public.profiles;
 drop policy if exists "own profile update" on public.profiles;
 drop policy if exists "admin reads profiles" on public.profiles;
 drop policy if exists "profile owner or admin reads" on public.profiles;
+drop policy if exists "profile owners update own profile" on public.profiles;
 create policy "profile owner or admin reads" on public.profiles
   for select to authenticated
   using (auth.uid() = id or public.is_site_admin());
+create policy "profile owners update own profile" on public.profiles
+  for update to authenticated
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 drop policy if exists "admin roles select" on public.admin_roles;
 drop policy if exists "users read own role and super admins read all" on public.admin_roles;
@@ -435,11 +448,15 @@ drop policy if exists "admin reads registrations" on public.participants;
 drop policy if exists "public participants insert" on public.participants;
 drop policy if exists "admins read participants" on public.participants;
 drop policy if exists "admins delete participants" on public.participants;
+drop policy if exists "participants owner reads own registrations" on public.participants;
 drop policy if exists "public can register participants" on public.participants;
 create policy "public can register participants" on public.participants
   for insert to anon, authenticated with check (
     consent and length(trim(full_name)) > 0 and length(trim(phone)) > 0
+    and (user_id is null or user_id = auth.uid())
   );
+create policy "participants owner reads own registrations" on public.participants
+  for select to authenticated using (user_id = auth.uid());
 create policy "admins read participants" on public.participants
   for select to authenticated using (public.is_site_admin());
 create policy "admins delete participants" on public.participants
@@ -451,12 +468,16 @@ drop policy if exists "admin reads applications" on public.volunteers;
 drop policy if exists "public volunteers insert" on public.volunteers;
 drop policy if exists "admins read volunteers" on public.volunteers;
 drop policy if exists "admins delete volunteers" on public.volunteers;
+drop policy if exists "volunteers owner reads own applications" on public.volunteers;
 drop policy if exists "public can apply as volunteer or partner" on public.volunteers;
 create policy "public can apply as volunteer or partner" on public.volunteers
   for insert to anon, authenticated with check (
     consent and length(trim(full_name)) > 0 and length(trim(phone)) > 0
     and length(trim(email)) > 0
+    and (user_id is null or user_id = auth.uid())
   );
+create policy "volunteers owner reads own applications" on public.volunteers
+  for select to authenticated using (user_id = auth.uid());
 create policy "admins read volunteers" on public.volunteers
   for select to authenticated using (public.is_site_admin());
 create policy "admins delete volunteers" on public.volunteers

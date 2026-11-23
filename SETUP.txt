@@ -9,17 +9,23 @@ Database and admin setup
 1. Make sure the Auth user with the supplied UID and email exists in Supabase.
 2. Run supabase/website-cms-admin.sql in the Supabase SQL Editor. It creates
    the website content, admin-role, website-data and form-submission schema,
-   enables row-level security, and promotes that existing account to super
-   admin. If an earlier run stopped with an error, rerun the updated file. Do
-   not run this file from browser code.
+   enables row-level security, promotes that existing account to super admin,
+   and enables member profiles and private, account-owned registration history.
+   If an earlier run stopped with an error, rerun the updated file. Do not run
+   this file from browser code.
 3. Authenticate the Supabase CLI with `supabase login`, then deploy the admin
    invitation function with
    `supabase functions deploy invite-admin --project-ref naejurohofikbcwgawmj`.
    The function uses Supabase server secrets; never put a service_role key in
    config.js or any other browser file.
 4. Sign in at /admin/ with the promoted account. Super admins can invite or
-   remove admins there. Admins can manage pages, navigation, settings, cards,
-   team, projects, sessions, gallery items, and incoming forms.
+   remove admins there. The dashboard sidebar groups page publishing, page
+   text, content cards, navigation, site settings, website records and the
+   private form inbox. Admins can upload card, team and gallery images into the
+   Supabase media bucket. Website text, links, settings, records and uploaded
+   image URLs are saved in Supabase; the dashboard offers a public-page preview.
+   Members can create an account, update their own profile and review their
+   own registrations and applications on the Join page.
 5. Registration, volunteer, partner and contact submissions are private.
    Row-level security lets visitors submit forms but only admins read them.
 
