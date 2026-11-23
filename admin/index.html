@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Website admin | Pixel Pathfinders</title>
+    <link rel="stylesheet" href="/admin/admin.css?v=20261123-2" />
+  </head>
+  <body>
+    <header class="admin-header">
+      <a href="../index.html" class="admin-brand">Pixel Pathfinders</a>
+      <div id="accountBar" hidden>
+        <span id="roleBadge" class="role-badge"></span>
+        <button id="signOutButton" class="button button-quiet" type="button">
+          Sign out
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <section id="loginPanel" class="panel login-panel">
+        <h1>Admin sign in</h1>
+        <p>Use your approved Pixel Pathfinders admin account.</p>
+        <form id="loginForm" class="stack">
+          <label>
+            Email
+            <input name="email" type="email" autocomplete="username" required />
+          </label>
+          <label class="password-field">
+            Password
+            <span class="password-control">
+              <input
+                id="adminPassword"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+              />
+              <button
+                id="togglePassword"
+                class="password-toggle"
+                type="button"
+                aria-label="Show password"
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </span>
+          </label>
+          <button class="button" type="submit">Sign in</button>
+          <p
+            id="loginStatus"
+            class="status"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+      </section>
+
+      <section id="dashboardPanel" hidden>
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Website management</p>
+            <h1>Admin dashboard</h1>
+          </div>
+          <p
+            id="dashboardStatus"
+            class="status"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </div>
+
+        <nav class="tabs" aria-label="Admin sections">
+          <button class="tab active" type="button" data-tab="overview">
+            Overview
+          </button>
+          <button class="tab" type="button" data-tab="content">
+            Page content
+          </button>
+          <button class="tab" type="button" data-tab="blocks">
+            Content cards
+          </button>
+          <button class="tab" type="button" data-tab="navigation">
+            Navigation
+          </button>
+          <button class="tab" type="button" data-tab="settings">
+            Site settings
+          </button>
+          <button class="tab" type="button" data-tab="records">
+            Website data
+          </button>
+          <button class="tab" type="button" data-tab="inbox">
+            Form submissions
+          </button>
+          <button
+            class="tab"
+            type="button"
+            data-tab="admins"
+            data-super-admin
+            hidden
+          >
+            Admin accounts
+          </button>
+        </nav>
+
+        <section class="panel tab-panel" data-panel="overview">
+          <h2>Overview</h2>
+          <p>Manage public content and review forms submitted by visitors.</p>
+          <div id="overviewCounts" class="count-grid"></div>
+        </section>
+
+        <section class="panel tab-panel" data-panel="content" hidden>
+          <div class="section-heading">
+            <div>
+              <h2>Page content</h2>
+              <p>Edit headings, descriptions and page text.</p>
+            </div>
+            <label class="compact-field">
+              Page
+              <select id="contentPage"></select>
+            </label>
+          </div>
+          <form id="contentForm" class="stack">
+            <div id="contentEditor" class="editor-grid"></div>
+            <button class="button" type="submit">Save page content</button>
+          </form>
+        </section>
+
+        <section class="panel tab-panel" data-panel="blocks" hidden>
+          <div class="section-heading">
+            <div>
+              <h2>Content cards</h2>
+              <p>
+                Add, edit, reorder, publish or hide homepage and agenda cards.
+              </p>
+            </div>
+          </div>
+          <form id="blockForm" class="editor-form">
+            <input name="id" type="hidden" />
+            <label>Page<select name="page_slug" id="blockPage"></select></label>
+            <label>
+              Section
+              <select name="section_key" required>
+                <option value="home_services">Home: services</option>
+                <option value="home_values">Home: values</option>
+                <option value="home_pathway">Home: learning pathway</option>
+                <option value="home_partner_areas">Home: partner areas</option>
+                <option value="about_values">About: values</option>
+                <option value="session_agenda">Sessions: agenda</option>
+                <option value="gallery_filters">Gallery: filters</option>
+                <option value="join_volunteer_areas">
+                  Join: volunteer areas
+                </option>
+                <option value="join_partner_areas">
+                  Join: partner support
+                </option>
+              </select>
+            </label>
+            <label>Title<input name="title" required /></label>
+            <label class="wide"
+              >Text<textarea name="body" rows="3"></textarea>
+            </label>
+            <label>Image URL<input name="image_url" type="url" /></label>
+            <label
+              >Order<input name="sort_order" type="number" value="0"
+            /></label>
+            <label class="wide">
+              Extra data (JSON)
+              <textarea name="extra" rows="3">{}</textarea>
+            </label>
+            <label class="check-field">
+              <input name="is_published" type="checkbox" checked />
+              Published on the website
+            </label>
+            <div class="form-actions wide">
+              <button class="button" type="submit">Save card</button>
+              <button class="button button-quiet" type="reset">Clear</button>
+            </div>
+          </form>
+          <div id="blocksList" class="record-list"></div>
+        </section>
+
+        <section class="panel tab-panel" data-panel="navigation" hidden>
+          <h2>Navigation</h2>
+          <p>These links appear in the website header and footer.</p>
+          <form id="navigationForm" class="editor-form">
+            <input name="id" type="hidden" />
+            <label>
+              Location
+              <select name="location">
+                <option value="header">Header</option>
+                <option value="footer">Footer</option>
+                <option value="legal">Legal footer</option>
+              </select>
+            </label>
+            <label>Label<input name="label" required /></label>
+            <label class="wide">Link URL<input name="href" required /></label>
+            <label
+              >Order<input name="sort_order" type="number" value="0"
+            /></label>
+            <label class="check-field">
+              <input name="is_cta" type="checkbox" />
+              Highlight as a button
+            </label>
+            <label class="check-field">
+              <input name="is_active" type="checkbox" checked />
+              Show this link
+            </label>
+            <div class="form-actions wide">
+              <button class="button" type="submit">Save navigation link</button>
+              <button class="button button-quiet" type="reset">Clear</button>
+            </div>
+          </form>
+          <div id="navigationList" class="record-list"></div>
+        </section>
+
+        <section class="panel tab-panel" data-panel="settings" hidden>
+          <h2>Site settings</h2>
+          <p>Update the shared brand, contact, social and footer details.</p>
+          <form id="settingsForm" class="stack">
+            <div id="settingsEditor" class="editor-grid"></div>
+            <button class="button" type="submit">Save site settings</button>
+          </form>
+        </section>
+
+        <section class="panel tab-panel" data-panel="records" hidden>
+          <div class="section-heading">
+            <div>
+              <h2>Website data</h2>
+              <p>Manage team members, projects, sessions and gallery items.</p>
+            </div>
+            <label class="compact-field">
+              Collection
+              <select id="recordType">
+                <option value="team_members">Team members</option>
+                <option value="projects">Projects</option>
+                <option value="sessions">Sessions</option>
+                <option value="gallery_items">Gallery items</option>
+              </select>
+            </label>
+          </div>
+          <form id="recordForm" class="editor-form">
+            <input name="id" type="hidden" />
+            <div id="recordFields" class="editor-grid wide"></div>
+            <div class="form-actions wide">
+              <button class="button" type="submit">Save record</button>
+              <button class="button button-quiet" type="reset">Clear</button>
+            </div>
+          </form>
+          <div id="recordList" class="record-list"></div>
+        </section>
+
+        <section class="panel tab-panel" data-panel="inbox" hidden>
+          <div class="section-heading">
+            <div>
+              <h2>Form submissions</h2>
+              <p>Only approved admins can read these private submissions.</p>
+            </div>
+            <label class="compact-field">
+              Form
+              <select id="inboxType">
+                <option value="messages">Contact messages</option>
+                <option value="participants">Session registrations</option>
+                <option value="volunteers">
+                  Volunteer and partner applications
+                </option>
+                <option value="profiles">Member accounts</option>
+              </select>
+            </label>
+          </div>
+          <div id="inboxList" class="record-list"></div>
+        </section>
+
+        <section class="panel tab-panel" data-panel="admins" hidden>
+          <h2>Admin accounts</h2>
+          <p>
+            Invite an existing Auth user or send an invitation to a new admin.
+          </p>
+          <form id="inviteForm" class="inline-form">
+            <label>
+              Admin email
+              <input name="email" type="email" required />
+            </label>
+            <button class="button" type="submit">Invite admin</button>
+          </form>
+          <div id="adminsList" class="record-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/config.js"></script>
+    <script src="/admin/admin.js?v=20261123-2"></script>
+  </body>
+</html>

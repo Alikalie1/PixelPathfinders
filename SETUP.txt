@@ -1,0 +1,41 @@
+PIXEL PATHFINDERS WEBSITE
+========================
+
+The site stays in this folder. index.html is the homepage; the remaining HTML
+files are independent pages connected through the shared navigation.
+
+Database and admin setup
+------------------------
+1. Make sure the Auth user with the supplied UID and email exists in Supabase.
+2. Run supabase/website-cms-admin.sql in the Supabase SQL Editor. It creates
+   the website content, admin-role, website-data and form-submission schema,
+   enables row-level security, and promotes that existing account to super
+   admin. If an earlier run stopped with an error, rerun the updated file. Do
+   not run this file from browser code.
+3. Link the Supabase CLI to this project and deploy the admin invitation
+   function with `supabase functions deploy invite-admin`. The function uses
+   Supabase server secrets; never put a service_role key in config.js or any
+   other browser file.
+4. Sign in at /admin/ with the promoted account. Super admins can invite or
+   remove admins there. Admins can manage pages, navigation, settings, cards,
+   team, projects, sessions, gallery items, and incoming forms.
+5. Registration, volunteer, partner and contact submissions are private.
+   Row-level security lets visitors submit forms but only admins read them.
+
+The Supabase URL and publishable/anon key are configured in config.js.
+
+Before launch, replace the example email and placeholder social links in the
+page footers with the organisation's real contact details.
+
+Page map
+--------
+index.html     Home, overview, values, pathway, upcoming sessions and partners
+about.html     Vision, mission and values
+session.html   Session details and agenda
+team.html      Team directory
+join.html      Session registration, volunteer/partner applications, accounts
+project.html   Projects
+gallery.html   Gallery
+contact.html   Contact form
+privacy.html   Privacy policy
+terms.html     Terms and conditions

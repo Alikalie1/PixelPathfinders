@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Home | Pixel Pathfinders</title>
+    <meta
+      name="description"
+      content="Pixel Pathfinders: from idea to impact, pixel by pixel."
+    />
+    <link rel="icon" href="logo.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=20261123" />
+  </head>
+  <body>
+    <div id="bar"></div>
+    <header class="hd">
+      <a class="brand" href="index.html"
+        ><img src="logo.png" alt="" width="36" height="36" /><span
+          data-site-setting="brand_name"
+          >Pixel Pathfinders</span
+        ></a
+      >
+      <button id="mb" aria-label="Menu" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <nav id="nv" data-nav-location="header">
+        <a href="index.html" class="on">Home</a><a href="about.html">About</a
+        ><a href="team.html">Team</a><a href="session.html">Sessions</a
+        ><a href="index.html#partners">Partners</a
+        ><a href="project.html">Projects</a><a href="gallery.html">Gallery</a
+        ><a href="contact.html">Contact</a
+        ><a class="btn sm" href="join.html">Join us</a>
+      </nav>
+    </header>
+    <main>
+      <section class="hero">
+        <canvas id="cv"></canvas>
+        <div class="wrap hc">
+          <span class="chip" data-cms-key="hero.founded"
+            >Founded 9 September 2026</span
+          >
+          <h1>
+            <span data-cms-key="hero.title_prefix">Every path starts with</span>
+            <em data-cms-key="hero.title_focus">one pixel</em>.
+          </h1>
+          <p data-cms-key="hero.body">
+            We teach digital skills, build digital solutions and turn ideas into
+            impact. Free sessions, open to everybody.
+          </p>
+          <div class="row">
+            <a class="btn" href="session.html" data-cms-key="hero.primary"
+              >Join a free session</a
+            ><a
+              class="btn ghost"
+              href="about.html"
+              data-cms-key="hero.secondary"
+              >Our story</a
+            >
+          </div>
+          <div class="stats">
+            <div>
+              <b data-n="6" data-site-setting="founders_count">0</b
+              ><span data-cms-key="stats.founders_label">Founders</span>
+            </div>
+            <div>
+              <b data-n="52" data-site-setting="saturdays_count">0</b
+              ><span data-cms-key="stats.saturdays_label"
+                >Saturdays a year</span
+              >
+            </div>
+            <div>
+              <b data-n="100" data-site-setting="open_percent">0</b
+              ><span data-cms-key="stats.open_label">% open to all</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="wrap sec">
+        <h2 data-cms-key="services.heading">What we do</h2>
+        <div class="grid" data-cms-blocks="home_services">
+          <div class="card rv">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <h3>Free digital skills</h3>
+            <p>
+              Practical Saturday sessions for everybody, online and in person.
+            </p>
+          </div>
+          <div class="card rv">
+            <i class="fa-solid fa-code"></i>
+            <h3>Build solutions</h3>
+            <p>
+              Websites, apps and prototypes for businesses and organisations.
+            </p>
+          </div>
+          <div class="card rv">
+            <i class="fa-solid fa-hand-holding-heart"></i>
+            <h3>Volunteer</h3>
+            <p>
+              Complete a course, earn a certificate, then help real projects.
+            </p>
+          </div>
+          <div class="card rv">
+            <i class="fa-solid fa-award"></i>
+            <h3>Courses and certificates</h3>
+            <p>
+              Develop practical skills through structured learning programmes.
+            </p>
+          </div>
+          <div class="card rv">
+            <i class="fa-solid fa-seedling"></i>
+            <h3>Grow ideas</h3>
+            <p>We support promising ideas until they become products.</p>
+          </div>
+        </div>
+      </section>
+      <section class="band">
+        <div class="wrap">
+          <h2 data-cms-key="vision.heading">Where we are going</h2>
+          <div class="grid2">
+            <article class="card rv statement">
+              <h3 data-cms-key="vision.title">Our vision</h3>
+              <p data-cms-key="vision.body">
+                To be a trusted source of home-grown technology talent and
+                digital solutions that open new paths for national and
+                international development.
+              </p>
+            </article>
+            <article class="card rv statement green">
+              <h3 data-cms-key="mission.title">Our mission</h3>
+              <p data-cms-key="mission.body">
+                To turn ideas into impact by designing and building digital
+                solutions, developing working prototypes, mobilising investment
+                for promising ideas, and growing sustainable businesses.
+              </p>
+            </article>
+          </div>
+          <h3 data-cms-key="values.heading">Our values</h3>
+          <ul
+            class="values"
+            aria-label="Our values"
+            data-cms-blocks="home_values"
+          >
+            <li>Integrity</li>
+            <li>Innovation</li>
+            <li>Impact</li>
+            <li>Inclusion</li>
+            <li>Collaboration</li>
+            <li>Excellence</li>
+            <li>Accountability</li>
+            <li>Sustainability</li>
+          </ul>
+          <p class="row">
+            <a class="btn ghost" href="about.html" data-cms-key="values.link"
+              >More about us</a
+            >
+          </p>
+        </div>
+      </section>
+      <section class="band">
+        <div class="wrap">
+          <h2 data-cms-key="sessions.heading">Upcoming sessions</h2>
+          <div id="up" class="grid"></div>
+          <a class="btn" href="session.html" data-cms-key="sessions.link"
+            >All sessions</a
+          >
+        </div>
+      </section>
+      <section class="wrap sec">
+        <h2 data-cms-key="path.heading">Your path with Pixel Pathfinders</h2>
+        <p class="mut" data-cms-key="path.intro">
+          Start where you are. Each step leads to the next.
+        </p>
+        <ol class="path" data-cms-blocks="home_pathway">
+          <li>
+            <h3>Join a free session</h3>
+            <p>Register online and attend a Saturday session.</p>
+          </li>
+          <li>
+            <h3>Complete a course</h3>
+            <p>Build your skills and earn a certificate of completion.</p>
+          </li>
+          <li>
+            <h3>Volunteer with us</h3>
+            <p>Contribute to real projects in person or online.</p>
+          </li>
+          <li>
+            <h3>Build and grow</h3>
+            <p>Put your skills to work and help train the next group.</p>
+          </li>
+        </ol>
+        <p class="row">
+          <a
+            class="btn"
+            href="join.html?apply=volunteer#applications"
+            data-cms-key="path.cta"
+            >Volunteer or partner with us</a
+          >
+        </p>
+      </section>
+      <section class="wrap sec" id="partners">
+        <h2 data-cms-key="partners.heading">Our partners</h2>
+        <p class="mut" data-cms-key="partners.intro">
+          Work with us through sponsorship, mentoring, equipment, venues, or
+          training.
+        </p>
+        <div class="pl" data-cms-blocks="home_partner_areas">
+          <span>Sponsorship</span><span>Mentoring</span><span>Equipment</span
+          ><span>Community venues</span>
+        </div>
+        <p class="row">
+          <a
+            class="btn"
+            href="join.html?apply=partner#applications"
+            data-cms-key="partners.cta"
+            >Become a partner</a
+          >
+        </p>
+      </section>
+    </main>
+    <footer class="ft">
+      <div class="wrap fg">
+        <div>
+          <a class="brand" href="index.html"
+            ><img src="logo.png" alt="" width="36" height="36" /><span
+              data-site-setting="brand_name"
+              >Pixel Pathfinders</span
+            ></a
+          >
+          <p data-site-setting="tagline">
+            From idea to impact, pixel by pixel.
+          </p>
+          <div class="soc">
+            <a
+              href="#"
+              aria-label="Facebook"
+              data-site-setting="facebook_url"
+              data-site-href=""
+              ><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="Instagram"
+              data-site-setting="instagram_url"
+              data-site-href=""
+              ><i class="fa-brands fa-instagram" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="X"
+              data-site-setting="x_url"
+              data-site-href=""
+              ><i class="fa-brands fa-x-twitter" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="LinkedIn"
+              data-site-setting="linkedin_url"
+              data-site-href=""
+              ><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="YouTube"
+              data-site-setting="youtube_url"
+              data-site-href=""
+              ><i class="fa-brands fa-youtube" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="TikTok"
+              data-site-setting="tiktok_url"
+              data-site-href=""
+              ><i class="fa-brands fa-tiktok" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="WhatsApp"
+              data-site-setting="whatsapp_url"
+              data-site-href=""
+              ><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="Telegram"
+              data-site-setting="telegram_url"
+              data-site-href=""
+              ><i class="fa-brands fa-telegram" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="GitHub"
+              data-site-setting="github_url"
+              data-site-href=""
+              ><i class="fa-brands fa-github" aria-hidden="true"></i></a
+            ><a
+              href="mailto:hello@example.com"
+              aria-label="Email"
+              data-site-setting="contact_email"
+              data-site-href="mailto:"
+              ><i class="fa-solid fa-envelope" aria-hidden="true"></i
+            ></a>
+          </div>
+        </div>
+        <div>
+          <h4 data-site-setting="footer_explore_label">Explore</h4>
+          <a href="index.html" class="on">Home</a><a href="about.html">About</a
+          ><a href="team.html">Team</a><a href="session.html">Sessions</a
+          ><a href="index.html#partners">Partners</a
+          ><a href="project.html">Projects</a><a href="gallery.html">Gallery</a
+          ><a href="contact.html">Contact</a>
+        </div>
+        <div>
+          <h4 data-site-setting="footer_legal_label">Legal</h4>
+          <a href="privacy.html">Privacy Policy</a
+          ><a href="terms.html">Terms and Conditions</a
+          ><a href="join.html">Become a member</a>
+        </div>
+      </div>
+      <p class="cp" data-site-setting="copyright_text">
+        &copy; 2026 Pixel Pathfinders. Founded 9 September 2026.
+      </p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js?v=20261123-4"></script>
+    <script>
+      upcoming("up", 3);
+    </script>
+  </body>
+</html>
