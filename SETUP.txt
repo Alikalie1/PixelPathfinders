@@ -12,10 +12,11 @@ Database and admin setup
    enables row-level security, and promotes that existing account to super
    admin. If an earlier run stopped with an error, rerun the updated file. Do
    not run this file from browser code.
-3. Link the Supabase CLI to this project and deploy the admin invitation
-   function with `supabase functions deploy invite-admin`. The function uses
-   Supabase server secrets; never put a service_role key in config.js or any
-   other browser file.
+3. Authenticate the Supabase CLI with `supabase login`, then deploy the admin
+   invitation function with
+   `supabase functions deploy invite-admin --project-ref naejurohofikbcwgawmj`.
+   The function uses Supabase server secrets; never put a service_role key in
+   config.js or any other browser file.
 4. Sign in at /admin/ with the promoted account. Super admins can invite or
    remove admins there. Admins can manage pages, navigation, settings, cards,
    team, projects, sessions, gallery items, and incoming forms.
