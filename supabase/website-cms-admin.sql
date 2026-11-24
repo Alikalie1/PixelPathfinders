@@ -524,7 +524,8 @@ insert into public.site_settings (setting_key, label, value, input_type, sort_or
   ('show_social_whatsapp', 'Show WhatsApp icon', 'true', 'text', 25),
   ('show_social_telegram', 'Show Telegram icon', 'true', 'text', 26),
   ('show_social_github', 'Show GitHub icon', 'true', 'text', 27),
-  ('show_social_contact_email', 'Show email icon', 'true', 'text', 28)
+  ('show_social_contact_email', 'Show email icon', 'true', 'text', 28),
+  ('hero_image_url', 'Home hero image URL', 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=2000&q=85', 'url', 29)
 on conflict (setting_key) do nothing;
 
 insert into public.site_navigation_items (location, label, href, sort_order, is_cta) values

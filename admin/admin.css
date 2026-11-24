@@ -113,9 +113,30 @@ button {
 }
 
 .login-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   width: min(460px, 100%);
   margin: 7vh auto;
   padding: clamp(24px, 5vw, 42px);
+}
+
+.login-panel::before {
+  position: absolute;
+  z-index: 0;
+  top: -84px;
+  right: -88px;
+  width: 260px;
+  height: 260px;
+  background: url("/logo.png") center / contain no-repeat;
+  content: "";
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.login-panel > * {
+  position: relative;
+  z-index: 1;
 }
 
 .login-logo {

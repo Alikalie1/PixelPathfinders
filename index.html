@@ -17,7 +17,9 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20261124-3" />
+    <link rel="stylesheet" href="style.css?v=20261124-4" />
+    <link rel="stylesheet" href="accessibility.css?v=20261124-1" />
+    <script src="accessibility.js?v=20261124-1"></script>
   </head>
   <body>
     <div id="bar"></div>
@@ -42,6 +44,15 @@
     </header>
     <main>
       <section class="hero">
+        <img
+          class="hero-photo"
+          data-site-image="hero_image_url"
+          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&amp;fit=crop&amp;w=2000&amp;q=85"
+          alt=""
+          aria-hidden="true"
+          fetchpriority="high"
+          decoding="async"
+        />
         <canvas id="cv"></canvas>
         <div class="wrap hc">
           <span class="chip" data-cms-key="hero.founded"
@@ -322,7 +333,7 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="app.js?v=20261124-3"></script>
+    <script src="app.js?v=20261124-4"></script>
     <script>
       upcoming("up", 3);
     </script>

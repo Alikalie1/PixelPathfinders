@@ -202,6 +202,19 @@ async function loadSiteContent() {
         element.textContent = value;
       }
     });
+    $$("[data-site-image]").forEach((element) => {
+      const value = String(
+        settings.get(element.dataset.siteImage) || "",
+      ).trim();
+      const imageUrl = value ? safeHref(value) : "#";
+      if (imageUrl === "#") {
+        element.removeAttribute("src");
+        element.hidden = true;
+      } else {
+        element.src = imageUrl;
+        element.hidden = false;
+      }
+    });
     Object.entries(socialIcons).forEach(([name, settingKey]) => {
       const visible = settings.get(`show_social_${name}`) !== "false";
       $$(`[data-site-setting="${settingKey}"]`).forEach((element) => {
@@ -304,6 +317,14 @@ document.querySelectorAll("[data-n]").forEach((el) => {
   const n = +el.dataset.n;
   let i = 0;
   const t = setInterval(() => {
+    if (
+      matchMedia("(prefers-reduced-motion:reduce)").matches ||
+      document.documentElement.dataset.a11yMotion === "reduced"
+    ) {
+      el.textContent = String(n);
+      clearInterval(t);
+      return;
+    }
     i += Math.max(1, n / 40);
     if (i >= n) {
       i = n;
@@ -313,7 +334,11 @@ document.querySelectorAll("[data-n]").forEach((el) => {
   }, 35);
 });
 const cv = $("#cv");
-if (cv && !matchMedia("(prefers-reduced-motion:reduce)").matches) {
+if (
+  cv &&
+  !matchMedia("(prefers-reduced-motion:reduce)").matches &&
+  document.documentElement.dataset.a11yMotion !== "reduced"
+) {
   const x = cv.getContext("2d"),
     S = 30;
   let w,
@@ -330,6 +355,7 @@ if (cv && !matchMedia("(prefers-reduced-motion:reduce)").matches) {
   fit();
   addEventListener("resize", fit);
   (function f() {
+    if (document.documentElement.dataset.a11yMotion === "reduced") return;
     x.clearRect(0, 0, w, h);
     t += 0.012;
     const L = Math.min(c, r);

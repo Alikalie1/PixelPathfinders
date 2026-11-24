@@ -33,7 +33,10 @@ Database and admin setup
    dashboard without the public site header or footer. New account profile
    details are saved to profiles by the Auth signup trigger; members can update
    those details, view published upcoming sessions, register for a session,
-   apply as a volunteer, and review their own activity there.
+   apply as a volunteer, and review their own activity there. The site settings
+   include the home hero stock photo URL; admins can replace it with a URL or
+   upload an image to Supabase Storage. Public and admin pages include an
+   accessibility menu for larger text, high contrast, and reduced motion.
 5. Registration, volunteer, partner and contact submissions are private.
    Row-level security lets visitors submit forms but only admins read them.
 

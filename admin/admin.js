@@ -711,10 +711,22 @@ async function loadSettings() {
         : setting.input_type === "textarea"
           ? `<textarea name="${escapeHtml(setting.setting_key)}" rows="3">${escapeHtml(setting.value)}</textarea>`
           : `<input name="${escapeHtml(setting.setting_key)}" type="${escapeHtml(setting.input_type)}" value="${escapeHtml(setting.value)}">`;
+      if (setting.setting_key === "hero_image_url")
+        return `<div class="editor-field"><label>${escapeHtml(setting.label)}${control}</label><label class="setting-upload">Upload replacement hero image<input type="file" accept="image/*" data-image-upload-for="hero_image_url"><small>Upload an image (up to 8 MB) to Supabase Storage, then save site settings to publish it.</small></label></div>`;
       return `<label class="editor-field${socialToggle ? " check-field" : ""}">${escapeHtml(setting.label)}${control}</label>`;
     })
     .join("");
 }
+
+$("#settingsForm").addEventListener("change", async (event) => {
+  const upload =
+    event.target instanceof Element
+      ? event.target.closest("[data-image-upload-for]")
+      : null;
+  const file = upload?.files?.[0];
+  if (!upload || !file) return;
+  await uploadImageIntoField(upload, file);
+});
 
 $("#settingsForm").addEventListener("submit", async (event) => {
   event.preventDefault();
