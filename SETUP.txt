@@ -24,8 +24,11 @@ Database and admin setup
    private form inbox. Admins can upload card, team and gallery images into the
    Supabase media bucket. Website text, links, settings, records and uploaded
    image URLs are saved in Supabase; the dashboard offers a public-page preview.
-   Members can create an account, update their own profile and review their
-   own registrations and applications on the Join page.
+   Members can create an account and sign in on the Join page. After
+   authentication they are redirected to member-dashboard.html, a private
+   dashboard without the public site header or footer. New account profile
+   details are saved to profiles by the Auth signup trigger; members can update
+   those details and review their own registrations and applications there.
 5. Registration, volunteer, partner and contact submissions are private.
    Row-level security lets visitors submit forms but only admins read them.
 

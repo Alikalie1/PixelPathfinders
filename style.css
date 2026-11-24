@@ -635,6 +635,30 @@ textarea:focus {
 .member-activity-status.err {
   color: #b42318;
 }
+.member-dashboard-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at top left, rgb(30 91 184 / 9%), transparent 42%),
+    var(--bg);
+}
+.member-portal {
+  width: min(100% - 32px, 1100px);
+  margin: 0 auto;
+  padding: clamp(24px, 6vw, 72px) 0;
+}
+.member-gate-status {
+  margin: 0 0 10px;
+  font-weight: 600;
+}
+.member-gate-status.err {
+  color: #b42318;
+}
+.member-gate-link {
+  font-weight: 600;
+}
+.member-dashboard-page .member-dashboard {
+  max-width: none;
+}
 .member-dashboard {
   padding: clamp(20px, 3vw, 32px);
 }
@@ -642,9 +666,15 @@ textarea:focus {
   align-items: flex-start;
   margin-bottom: 20px;
 }
+.member-dashboard-heading h1,
 .member-dashboard-heading h3 {
   margin: 0 0 4px;
   font-size: 24px;
+}
+.member-dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .member-dashboard-heading p:last-child {
   margin: 0;
@@ -741,16 +771,6 @@ textarea:focus {
 }
 .member-activity-item small {
   margin-top: 4px;
-}
-.member-dashboard-footer {
-  margin: 18px 0 0;
-  padding-top: 15px;
-  border-top: 1px solid #e3e8f0;
-  color: var(--t);
-  font-size: 14px;
-}
-.member-dashboard-footer a {
-  font-weight: 600;
 }
 .path {
   display: grid;
@@ -933,6 +953,9 @@ textarea:focus {
   }
   .member-dashboard-heading {
     flex-direction: column;
+  }
+  .member-dashboard-actions {
+    width: 100%;
   }
   .member-signout {
     align-self: flex-start;

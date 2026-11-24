@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Member dashboard | Pixel Pathfinders</title>
+    <meta
+      name="description"
+      content="Manage your Pixel Pathfinders member profile and activity."
+    />
+    <link rel="icon" href="logo.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=20261124-1" />
+  </head>
+  <body class="member-dashboard-page">
+    <main class="member-portal">
+      <div id="memberGate">
+        <p id="memberGateStatus" class="member-gate-status" role="status">
+          Checking your sign-in…
+        </p>
+        <a class="member-gate-link" href="join.html?login=1"
+          >Return to member login</a
+        >
+      </div>
+      <section id="memberDashboard" class="member-dashboard" hidden>
+        <div class="member-dashboard-heading">
+          <div>
+            <p class="member-eyebrow">YOUR ACCOUNT</p>
+            <h1 id="memberWelcome">Welcome</h1>
+            <p id="memberEmail" class="mut"></p>
+          </div>
+          <div class="member-dashboard-actions">
+            <a class="btn sm" href="join.html#applications">Join a session</a>
+            <button class="btn sm member-signout" id="lo" type="button">
+              <i
+                class="fa-solid fa-arrow-right-from-bracket"
+                aria-hidden="true"
+              ></i>
+              Log out
+            </button>
+          </div>
+        </div>
+        <div class="member-summary">
+          <article class="member-summary-card">
+            <span>Member number</span>
+            <strong id="memberNumber">—</strong>
+          </article>
+          <article class="member-summary-card">
+            <span>Session registrations</span>
+            <strong id="memberRegistrationCount">0</strong>
+          </article>
+          <article class="member-summary-card">
+            <span>Applications sent</span>
+            <strong id="memberApplicationCount">0</strong>
+          </article>
+        </div>
+        <div class="member-dashboard-grid">
+          <section class="member-dashboard-card">
+            <h2>Your profile</h2>
+            <p class="mut">
+              Keep your contact details and session preference up to date.
+            </p>
+            <form id="memberProfileForm" class="form member-form">
+              <label
+                >Full name<input
+                  name="full_name"
+                  autocomplete="name"
+                  required
+              /></label>
+              <label
+                >Phone or WhatsApp<input
+                  name="phone"
+                  type="tel"
+                  autocomplete="tel"
+              /></label>
+              <label
+                >Preferred session format<select name="mode">
+                  <option value="Virtual">Online</option>
+                  <option value="Physical">In person</option>
+                </select></label
+              >
+              <button class="btn member-submit" type="submit">
+                Save my profile
+              </button>
+            </form>
+            <p
+              id="memberProfileStatus"
+              class="member-activity-status"
+              role="status"
+              aria-live="polite"
+            ></p>
+          </section>
+          <section class="member-dashboard-card">
+            <h2>Your activity</h2>
+            <p class="mut">
+              Your recent registrations and volunteer or partner applications.
+            </p>
+            <p
+              id="memberActivityStatus"
+              class="member-activity-status"
+              role="status"
+              aria-live="polite"
+            ></p>
+            <div class="member-activity-columns">
+              <div>
+                <h3>Session registrations</h3>
+                <div
+                  id="memberRegistrations"
+                  class="member-activity-list"
+                ></div>
+              </div>
+              <div>
+                <h3>Applications</h3>
+                <div
+                  id="memberApplications"
+                  class="member-activity-list"
+                ></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js?v=20261124-1"></script>
+    <script>
+      auth();
+    </script>
+  </body>
+</html>

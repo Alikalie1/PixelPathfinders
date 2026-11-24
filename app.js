@@ -504,18 +504,107 @@ function auth() {
       : "Log in to update your profile and see your recent registrations and applications.";
     setMessage("");
   };
-  const showSignedIn = async (user) => {
+  const showSignedIn = (user) => {
     currentMember = user;
-    authPanel.hidden = true;
-    memberDashboard.hidden = false;
-    $("#memberWelcome").textContent =
-      user.user_metadata?.full_name || user.email?.split("@")[0] || "Member";
-    $("#memberEmail").textContent = user.email || "";
-    $("#memberProfileStatus").textContent = "";
-    $("#memberActivityStatus").textContent = "";
-    $("#memberDashboardStatus").textContent = "";
-    await loadMemberDashboard(user);
+    window.location.assign("member-dashboard.html");
   };
+
+  if (memberDashboard && !authPanel) {
+    const gateStatus = $("#memberGateStatus");
+    const setGateStatus = (text, type = "") => {
+      gateStatus.textContent = text;
+      gateStatus.className = `member-gate-status ${type}`.trim();
+      gateStatus.hidden = false;
+    };
+
+    if (!db) {
+      setGateStatus(
+        "Member dashboard is unavailable until Supabase is configured.",
+        "err",
+      );
+      return;
+    }
+
+    $("#memberProfileForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const button = $('button[type="submit"]', form);
+      const originalLabel = button.textContent;
+      const fields = Object.fromEntries(new FormData(form));
+      const profileStatus = $("#memberProfileStatus");
+      button.disabled = true;
+      button.textContent = "Saving…";
+      profileStatus.textContent = "";
+      try {
+        const { data, error } = await db
+          .from("profiles")
+          .update({
+            full_name: String(fields.full_name || "").trim(),
+            phone: String(fields.phone || "").trim() || null,
+            mode: fields.mode,
+          })
+          .eq("id", currentMember.id)
+          .select("id")
+          .maybeSingle();
+        if (error) throw error;
+        if (!data) throw new Error("Member profile was not found.");
+        $("#memberWelcome").textContent = String(fields.full_name).trim();
+        profileStatus.textContent = "Your profile has been saved.";
+        profileStatus.className = "member-activity-status ok";
+      } catch (error) {
+        console.error("Could not save member profile:", error);
+        profileStatus.textContent =
+          "Could not save your profile. Please try again.";
+        profileStatus.className = "member-activity-status err";
+      } finally {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
+    });
+
+    $("#lo").addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      try {
+        const { error } = await db.auth.signOut();
+        if (error) throw error;
+        window.location.replace("join.html?login=1");
+      } catch (error) {
+        console.error("Could not sign out member:", error);
+        setGateStatus("Could not sign out. Please try again.", "err");
+        button.disabled = false;
+      }
+    });
+
+    db.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") window.location.replace("join.html?login=1");
+    });
+    db.auth
+      .getSession()
+      .then(async ({ data, error }) => {
+        if (error) throw error;
+        const user = data.session?.user;
+        if (!user) {
+          window.location.replace("join.html?login=1");
+          return;
+        }
+        currentMember = user;
+        $("#memberWelcome").textContent =
+          user.user_metadata?.full_name || user.email?.split("@")[0] || "Member";
+        $("#memberEmail").textContent = user.email || "";
+        $("#memberDashboard").hidden = false;
+        $("#memberGate").hidden = true;
+        await loadMemberDashboard(user);
+      })
+      .catch((error) => {
+        console.error("Could not verify member session:", error);
+        setGateStatus(
+          "We could not verify your sign-in. Please return to the login page and try again.",
+          "err",
+        );
+      });
+    return;
+  }
 
   $("#t1").addEventListener("click", () => switchForm(true));
   $("#t2").addEventListener("click", () => switchForm(false));
@@ -566,9 +655,6 @@ function auth() {
       if (error) throw error;
       if (data.session?.user) {
         await showSignedIn(data.session.user);
-        $("#memberDashboardStatus").textContent =
-          "Your account is ready. Welcome to Pixel Pathfinders!";
-        $("#memberDashboardStatus").className = "member-status status ok";
       } else {
         form.reset();
         switchForm(false);
@@ -608,8 +694,6 @@ function auth() {
       });
       if (error) throw error;
       await showSignedIn(data.user);
-      $("#memberDashboardStatus").textContent = "You are signed in.";
-      $("#memberDashboardStatus").className = "member-status status ok";
     } catch (error) {
       console.error("Could not sign in member:", error);
       setMessage(
@@ -624,72 +708,7 @@ function auth() {
     }
   });
 
-  $("#memberProfileForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!db || !currentMember) return;
-    const form = event.currentTarget;
-    const button = $('button[type="submit"]', form);
-    const originalLabel = button.textContent;
-    const fields = Object.fromEntries(new FormData(form));
-    button.disabled = true;
-    button.textContent = "Saving…";
-    const profileStatus = $("#memberProfileStatus");
-    profileStatus.textContent = "";
-    try {
-      const { error } = await db
-        .from("profiles")
-        .update({
-          full_name: String(fields.full_name || "").trim(),
-          phone: String(fields.phone || "").trim() || null,
-          mode: fields.mode,
-        })
-        .eq("id", currentMember.id);
-      if (error) throw error;
-      $("#memberWelcome").textContent = String(fields.full_name).trim();
-      currentMember.user_metadata = {
-        ...currentMember.user_metadata,
-        full_name: String(fields.full_name).trim(),
-        phone: String(fields.phone || "").trim(),
-        mode: fields.mode,
-      };
-      profileStatus.textContent = "Your profile has been saved.";
-      profileStatus.className = "member-activity-status ok";
-    } catch (error) {
-      console.error("Could not save member profile:", error);
-      profileStatus.textContent =
-        "Could not save your profile. Please try again.";
-      profileStatus.className = "member-activity-status err";
-    } finally {
-      button.disabled = false;
-      button.textContent = originalLabel;
-    }
-  });
-
-  $("#lo").addEventListener("click", async () => {
-    if (!db) return;
-    const button = $("#lo");
-    button.disabled = true;
-    const { error } = await db.auth.signOut();
-    button.disabled = false;
-    if (error) {
-      console.error("Could not sign out member:", error);
-      $("#memberActivityStatus").textContent =
-        "Could not sign out. Please try again.";
-      $("#memberActivityStatus").className = "member-activity-status err";
-      return;
-    }
-    currentMember = null;
-    memberDashboard.hidden = true;
-    authPanel.hidden = false;
-    $("#memberDashboardStatus").textContent = "";
-    $("#memberProfileForm").reset();
-    $("#rf").reset();
-    $("#lf").reset();
-    switchForm(false);
-    setMessage("You have been signed out.", "ok");
-  });
-
-  switchForm(true);
+  switchForm(new URLSearchParams(location.search).get("login") !== "1");
   if (!db) {
     setMessage("Connect Supabase to create or access a member account.", "err");
     return;
@@ -742,6 +761,10 @@ async function loadMemberDashboard(user) {
     $("#memberNumber").textContent = profileResult.data.member_no || "—";
     if (profileResult.data.full_name)
       $("#memberWelcome").textContent = profileResult.data.full_name;
+  } else {
+    profileStatus.textContent =
+      "Your profile record is missing. Run the latest member dashboard migration.";
+    profileStatus.className = "member-activity-status err";
   }
 
   const activityErrors = [];
@@ -1003,6 +1026,12 @@ async function submitRegistration(event, formElement, table, row) {
   button.disabled = true;
   button.textContent = "Sending…";
   try {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await db.auth.getSession();
+    if (sessionError) throw sessionError;
+    row.user_id = session?.user.id || row.user_id || null;
     const { error } = await db.from(table).insert(row);
     if (error) throw error;
 
