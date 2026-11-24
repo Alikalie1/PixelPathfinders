@@ -514,7 +514,17 @@ insert into public.site_settings (setting_key, label, value, input_type, sort_or
   ('saturdays_count', 'Saturdays per year statistic', '52', 'text', 15),
   ('open_percent', 'Open to all statistic', '100', 'text', 16),
   ('footer_explore_label', 'Footer explore heading', 'Explore', 'text', 17),
-  ('footer_legal_label', 'Footer legal heading', 'Legal', 'text', 18)
+  ('footer_legal_label', 'Footer legal heading', 'Legal', 'text', 18),
+  ('show_social_facebook', 'Show Facebook icon', 'true', 'text', 19),
+  ('show_social_instagram', 'Show Instagram icon', 'true', 'text', 20),
+  ('show_social_x', 'Show X icon', 'true', 'text', 21),
+  ('show_social_linkedin', 'Show LinkedIn icon', 'true', 'text', 22),
+  ('show_social_youtube', 'Show YouTube icon', 'true', 'text', 23),
+  ('show_social_tiktok', 'Show TikTok icon', 'true', 'text', 24),
+  ('show_social_whatsapp', 'Show WhatsApp icon', 'true', 'text', 25),
+  ('show_social_telegram', 'Show Telegram icon', 'true', 'text', 26),
+  ('show_social_github', 'Show GitHub icon', 'true', 'text', 27),
+  ('show_social_contact_email', 'Show email icon', 'true', 'text', 28)
 on conflict (setting_key) do nothing;
 
 insert into public.site_navigation_items (location, label, href, sort_order, is_cta) values

@@ -705,11 +705,13 @@ async function loadSettings() {
   }
   $("#settingsEditor").innerHTML = data
     .map((setting) => {
-      const control =
-        setting.input_type === "textarea"
+      const socialToggle = setting.setting_key.startsWith("show_social_");
+      const control = socialToggle
+        ? `<input name="${escapeHtml(setting.setting_key)}" type="checkbox"${setting.value !== "false" ? " checked" : ""}>`
+        : setting.input_type === "textarea"
           ? `<textarea name="${escapeHtml(setting.setting_key)}" rows="3">${escapeHtml(setting.value)}</textarea>`
           : `<input name="${escapeHtml(setting.setting_key)}" type="${escapeHtml(setting.input_type)}" value="${escapeHtml(setting.value)}">`;
-      return `<label class="editor-field">${escapeHtml(setting.label)}${control}</label>`;
+      return `<label class="editor-field${socialToggle ? " check-field" : ""}">${escapeHtml(setting.label)}${control}</label>`;
     })
     .join("");
 }
@@ -719,7 +721,7 @@ $("#settingsForm").addEventListener("submit", async (event) => {
   const fields = $$("[name]", $("#settingsEditor"));
   const payload = fields.map((field) => ({
     setting_key: field.name,
-    value: field.value,
+    value: field.type === "checkbox" ? String(field.checked) : field.value,
   }));
   if (!payload.length)
     return setDashboardStatus("There are no site settings to save.");

@@ -89,7 +89,9 @@ function renderContentBlock(section, block) {
     return `<li><h3>${esc(block.title)}</h3><p>${esc(block.body)}</p></li>`;
   }
   if (section === "home_partner_areas") {
-    return `<span>${esc(block.title)}</span>`;
+    return block.image_url
+      ? `<span class="partner-logo" title="${esc(block.title)}">${image}</span>`
+      : `<span class="partner-logo">${esc(block.title)}</span>`;
   }
   if (section === "home_values") {
     return `<li>${esc(block.title)}</li>`;
@@ -178,6 +180,18 @@ async function loadSiteContent() {
     const settings = new Map(
       settingsResult.data.map((item) => [item.setting_key, item.value]),
     );
+    const socialIcons = {
+      facebook: "facebook_url",
+      instagram: "instagram_url",
+      x: "x_url",
+      linkedin: "linkedin_url",
+      youtube: "youtube_url",
+      tiktok: "tiktok_url",
+      whatsapp: "whatsapp_url",
+      telegram: "telegram_url",
+      github: "github_url",
+      contact_email: "contact_email",
+    };
     $$("[data-site-setting]").forEach((element) => {
       const value = settings.get(element.dataset.siteSetting);
       if (value === undefined) return;
@@ -187,6 +201,12 @@ async function loadSiteContent() {
       } else {
         element.textContent = value;
       }
+    });
+    Object.entries(socialIcons).forEach(([name, settingKey]) => {
+      const visible = settings.get(`show_social_${name}`) !== "false";
+      $$(`[data-site-setting="${settingKey}"]`).forEach((element) => {
+        element.hidden = !visible;
+      });
     });
   }
 

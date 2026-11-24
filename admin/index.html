@@ -349,7 +349,9 @@
               <h2>Content cards</h2>
               <p class="section-help">
                 Create and edit cards, pathway steps, values, agenda items and
-                form choices. Changes are stored in Supabase.
+                form choices. To add a partner logo, choose Home: partner logos,
+                enter the partner name, then upload an image. Changes are stored
+                in Supabase.
               </p>
               <form id="blockForm" class="editor-form">
                 <input name="id" type="hidden" />
@@ -362,7 +364,7 @@
                     <option value="home_values">Home: values</option>
                     <option value="home_pathway">Home: learning pathway</option>
                     <option value="home_partner_areas">
-                      Home: partner areas
+                      Home: partner logos and names
                     </option>
                     <option value="about_values">About: values</option>
                     <option value="session_agenda">Sessions: agenda</option>
@@ -491,7 +493,8 @@
               <h2>Site settings</h2>
               <p class="section-help">
                 Edit the shared brand, contact information, social profile links
-                and footer. Saving updates all pages that use these settings.
+                and footer. Use the social display checkboxes to show or hide
+                individual icons across the public website.
               </p>
               <form id="settingsForm" class="stack">
                 <div id="settingsEditor" class="editor-grid"></div>
@@ -599,6 +602,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/config.js"></script>
-    <script src="/admin/admin.js?v=20261123-4"></script>
+    <script src="/admin/admin.js?v=20261124-1"></script>
   </body>
 </html>

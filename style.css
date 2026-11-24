@@ -318,6 +318,22 @@ nav a.on {
   border-radius: 12px;
   color: #8a97ad;
 }
+.pl .partner-logo {
+  min-width: 150px;
+  min-height: 108px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e3e8f0;
+  background: #fff;
+  color: var(--n);
+  font-weight: 600;
+}
+.pl .partner-logo img {
+  width: auto;
+  max-width: 100%;
+  max-height: 78px;
+  object-fit: contain;
+}
 .form {
   max-width: 520px;
   display: grid;
@@ -508,6 +524,39 @@ textarea:focus {
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 14px 38px rgb(15 27 45 / 7%);
+}
+.member-auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  color: #fff;
+  background: linear-gradient(120deg, var(--n), #16305a);
+}
+.member-auth-logo {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  padding: 5px;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 12px;
+  background: #fff;
+  object-fit: contain;
+}
+.member-auth-brand strong,
+.member-auth-brand span {
+  display: block;
+}
+.member-auth-brand strong {
+  font:
+    700 18px "Space Grotesk",
+    Inter,
+    sans-serif;
+}
+.member-auth-brand span {
+  margin-top: 3px;
+  color: #cdd8ee;
+  font-size: 13px;
 }
 .member-auth-tabs {
   display: flex;

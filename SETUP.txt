@@ -10,7 +10,8 @@ Database and admin setup
 2. Run supabase/website-cms-admin.sql in the Supabase SQL Editor. It creates
    the website content, admin-role, website-data and form-submission schema,
    enables row-level security, promotes that existing account to super admin,
-   and enables member profiles and private, account-owned registration history.
+   enables member profiles and private, account-owned registration history, and
+   adds social icon visibility settings. Rerun after making CMS schema updates.
    If an earlier run stopped with an error, rerun the updated file. Do not run
    this file from browser code.
 3. Authenticate the Supabase CLI with `supabase login`, then deploy the admin
@@ -24,6 +25,9 @@ Database and admin setup
    private form inbox. Admins can upload card, team and gallery images into the
    Supabase media bucket. Website text, links, settings, records and uploaded
    image URLs are saved in Supabase; the dashboard offers a public-page preview.
+   Add partner logos from Content cards by choosing Home: partner logos, adding
+   the partner name, and uploading its image. Toggle individual footer social
+   icons from Site settings.
    Members can create an account and sign in on the Join page. After
    authentication they are redirected to member-dashboard.html, a private
    dashboard without the public site header or footer. New account profile
