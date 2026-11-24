@@ -7,6 +7,7 @@ const $$ = (selector, root = document) =>
 const cmsValues = new Map();
 const cmsBlocks = new Map();
 let currentMember = null;
+let currentMemberProfile = { full_name: "", phone: "", mode: "Virtual" };
 const esc = (value) =>
   String(value ?? "").replace(
     /[&<>"]/g,
@@ -525,6 +526,48 @@ function auth() {
       return;
     }
 
+    const dashboard = $("#memberDashboard");
+    const sidebarToggle = $("#memberSidebarToggle");
+    const backdrop = $("#memberSidebarBackdrop");
+    const setMemberView = (viewName) => {
+      $$("[data-member-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.memberPanel !== viewName;
+      });
+      $$("[data-member-view]").forEach((button) => {
+        const selected = button.dataset.memberView === viewName;
+        button.classList.toggle("active", selected);
+        if (selected) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      dashboard.classList.remove("sidebar-open");
+      backdrop.hidden = true;
+      sidebarToggle.setAttribute("aria-expanded", "false");
+    };
+    $$("[data-member-view]").forEach((button) => {
+      button.addEventListener("click", () =>
+        setMemberView(button.dataset.memberView),
+      );
+    });
+    $$("[data-open-member-view]").forEach((button) => {
+      button.addEventListener("click", () =>
+        setMemberView(button.dataset.openMemberView),
+      );
+    });
+    const closeSidebar = () => {
+      dashboard.classList.remove("sidebar-open");
+      backdrop.hidden = true;
+      sidebarToggle.setAttribute("aria-expanded", "false");
+    };
+    sidebarToggle.addEventListener("click", () => {
+      const isOpen = dashboard.classList.toggle("sidebar-open");
+      backdrop.hidden = !isOpen;
+      sidebarToggle.setAttribute("aria-expanded", String(isOpen));
+    });
+    backdrop.addEventListener("click", closeSidebar);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeSidebar();
+    });
+
     $("#memberProfileForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
@@ -544,11 +587,11 @@ function auth() {
             mode: fields.mode,
           })
           .eq("id", currentMember.id)
-          .select("id")
+          .select("full_name, phone, mode")
           .maybeSingle();
         if (error) throw error;
         if (!data) throw new Error("Member profile was not found.");
-        $("#memberWelcome").textContent = String(fields.full_name).trim();
+        renderMemberProfile(currentMember, data);
         profileStatus.textContent = "Your profile has been saved.";
         profileStatus.className = "member-activity-status ok";
       } catch (error) {
@@ -556,6 +599,99 @@ function auth() {
         profileStatus.textContent =
           "Could not save your profile. Please try again.";
         profileStatus.className = "member-activity-status err";
+      } finally {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
+    });
+
+    $("#memberAvailableSessions").addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-register-session]");
+      if (!button) return;
+      const form = $("#memberSessionForm");
+      if (!form.reportValidity()) return;
+
+      const sessionStatus = $("#memberSessionStatus");
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = "Registering…";
+      sessionStatus.textContent = "";
+      try {
+        const { error } = await db.from("participants").insert({
+          user_id: currentMember.id,
+          full_name: currentMemberProfile.full_name,
+          phone: form.elements.phone.value.trim(),
+          email: currentMember.email,
+          age_group: null,
+          session_id: button.dataset.registerSession,
+          mode: form.elements.mode.value,
+          level: form.elements.level.value,
+          goals: null,
+          consent: true,
+        });
+        if (error) throw error;
+        sessionStatus.textContent = "Your session registration was received.";
+        sessionStatus.className = "member-activity-status ok";
+        await loadMemberDashboard(currentMember);
+      } catch (error) {
+        console.error("Could not register member for session:", error);
+        sessionStatus.textContent =
+          error.message || "Could not register for this session. Please try again.";
+        sessionStatus.className = "member-activity-status err";
+      } finally {
+        if (button.isConnected) {
+          button.disabled = false;
+          button.textContent = originalLabel;
+        }
+      }
+    });
+
+    $("#memberVolunteerForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      if (!form.reportValidity()) return;
+      const values = new FormData(form);
+      const areas = values.getAll("areas");
+      const status = $("#memberVolunteerStatus");
+      if (!areas.length) {
+        status.textContent = "Select at least one area where you can help.";
+        status.className = "member-activity-status err";
+        return;
+      }
+
+      const button = $('button[type="submit"]', form);
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = "Sending application…";
+      status.textContent = "";
+      try {
+        const { error } = await db.from("volunteers").insert({
+          user_id: currentMember.id,
+          role: "volunteer",
+          full_name: String(values.get("full_name") || "").trim(),
+          organisation: null,
+          phone: String(values.get("phone") || "").trim(),
+          email: String(values.get("email") || "").trim(),
+          course_completed: String(values.get("course_completed") || "").trim(),
+          certificate_no:
+            String(values.get("certificate_no") || "").trim() || null,
+          mode: values.get("mode"),
+          areas,
+          availability: String(values.get("availability") || "").trim() || null,
+          message: String(values.get("message") || "").trim() || null,
+          consent: values.get("consent") === "on",
+        });
+        if (error) throw error;
+        form.reset();
+        renderMemberProfile(currentMember, currentMemberProfile);
+        status.textContent = "Your volunteer application was received.";
+        status.className = "member-activity-status ok";
+        await loadMemberDashboard(currentMember);
+      } catch (error) {
+        console.error("Could not submit member volunteer application:", error);
+        status.textContent =
+          error.message || "Could not send your application. Please try again.";
+        status.className = "member-activity-status err";
       } finally {
         button.disabled = false;
         button.textContent = originalLabel;
@@ -725,27 +861,112 @@ function auth() {
     });
 }
 
+function renderMemberProfile(user, profile) {
+  const hasSavedProfile = profile !== null && profile !== undefined;
+  currentMemberProfile = {
+    full_name:
+      (hasSavedProfile ? profile.full_name : user.user_metadata?.full_name) ||
+      user.email ||
+      "",
+    phone: hasSavedProfile
+      ? profile.phone || ""
+      : user.user_metadata?.phone || "",
+    mode: hasSavedProfile
+      ? profile.mode || "Virtual"
+      : user.user_metadata?.mode || "Virtual",
+  };
+  const { full_name, phone, mode } = currentMemberProfile;
+  const email = user.email || "";
+
+  $("#memberWelcome").textContent = full_name || "Member";
+  $("#memberEmail").textContent = email;
+  $("#memberSidebarName").textContent = full_name || "Member";
+  $("#memberSidebarEmail").textContent = email;
+  $("#memberOverviewName").textContent = full_name || "Not provided";
+  $("#memberOverviewEmail").textContent = email || "Not available";
+  $("#memberOverviewPhone").textContent = phone || "Add a contact number";
+
+  const profileForm = $("#memberProfileForm");
+  profileForm.elements.full_name.value = full_name;
+  profileForm.elements.phone.value = phone;
+  profileForm.elements.mode.value = mode;
+  $("#memberProfileEmail").value = email;
+
+  const sessionPhone = $("#memberSessionPhone");
+  sessionPhone.value = phone;
+  $("#memberSessionForm").elements.mode.value =
+    mode === "Physical" ? "In person" : "Virtual";
+  const volunteerForm = $("#memberVolunteerForm");
+  volunteerForm.elements.full_name.value = full_name;
+  volunteerForm.elements.email.value = email;
+  volunteerForm.elements.phone.value = phone;
+  volunteerForm.elements.mode.value = mode;
+}
+
+function renderMemberSessions(sessions, registrations) {
+  const registeredIds = new Set(
+    registrations
+      .map((registration) => registration.session_id)
+      .filter((sessionId) => sessionId && sessionId !== "any"),
+  );
+  const renderCards = (items) =>
+    items.length
+      ? items
+          .map((session) => {
+            const registered = registeredIds.has(session.id);
+            return `<article class="member-session-card">
+              <span class="tag">${esc(session.platform || "Online")}</span>
+              <h3>${esc(session.title)}</h3>
+              <p class="member-session-date">${esc(new Date(session.session_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" }))}</p>
+              ${session.topic ? `<p>${esc(session.topic)}</p>` : ""}
+              <button class="btn sm" type="button" data-register-session="${esc(session.id)}" ${registered ? "disabled" : ""}>
+                ${registered ? "Already registered" : "Register for session"}
+              </button>
+            </article>`;
+          })
+          .join("")
+      : '<p class="member-empty">No upcoming sessions are available right now.</p>';
+
+  $("#memberAvailableSessions").innerHTML = renderCards(sessions);
+  $("#memberUpcomingSessions").innerHTML = renderCards(sessions.slice(0, 3));
+}
+
 async function loadMemberDashboard(user) {
-  const [profileResult, registrationsResult, applicationsResult] =
-    await Promise.all([
-      db
-        .from("profiles")
-        .select("full_name, phone, mode, member_no")
-        .eq("id", user.id)
-        .maybeSingle(),
-      db
-        .from("participants")
-        .select("id, session_id, mode, created_at", { count: "exact" })
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(5),
-      db
-        .from("volunteers")
-        .select("id, role, organisation, created_at", { count: "exact" })
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(5),
-    ]);
+  const [
+    profileResult,
+    registrationsResult,
+    applicationsResult,
+    sessionsResult,
+    registeredSessionsResult,
+  ] = await Promise.all([
+    db
+      .from("profiles")
+      .select("full_name, phone, mode, member_no")
+      .eq("id", user.id)
+      .maybeSingle(),
+    db
+      .from("participants")
+      .select("id, session_id, mode, created_at", { count: "exact" })
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    db
+      .from("volunteers")
+      .select("id, role, organisation, created_at", { count: "exact" })
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    db
+      .from("sessions")
+      .select("id, title, topic, session_date, platform")
+      .gte("session_date", new Date().toISOString())
+      .eq("is_published", true)
+      .order("session_date", { ascending: true }),
+    db
+      .from("participants")
+      .select("session_id")
+      .eq("user_id", user.id),
+  ]);
 
   const profileStatus = $("#memberProfileStatus");
   if (profileResult.error) {
@@ -753,18 +974,28 @@ async function loadMemberDashboard(user) {
     profileStatus.textContent =
       `Your profile could not be loaded: ${profileResult.error.message} Run the latest member dashboard migration.`;
     profileStatus.className = "member-activity-status err";
+    renderMemberProfile(user, null);
   } else if (profileResult.data) {
-    const form = $("#memberProfileForm");
-    form.elements.full_name.value = profileResult.data.full_name || "";
-    form.elements.phone.value = profileResult.data.phone || "";
-    form.elements.mode.value = profileResult.data.mode || "Virtual";
+    renderMemberProfile(user, profileResult.data);
     $("#memberNumber").textContent = profileResult.data.member_no || "—";
-    if (profileResult.data.full_name)
-      $("#memberWelcome").textContent = profileResult.data.full_name;
   } else {
     profileStatus.textContent =
       "Your profile record is missing. Run the latest member dashboard migration.";
     profileStatus.className = "member-activity-status err";
+    renderMemberProfile(user, null);
+  }
+
+  if (sessionsResult.error) {
+    console.error("Could not load member sessions:", sessionsResult.error);
+    $("#memberSessionStatus").textContent =
+      `Upcoming sessions could not be loaded: ${sessionsResult.error.message}`;
+    $("#memberSessionStatus").className = "member-activity-status err";
+    renderMemberSessions([], registeredSessionsResult.data || []);
+  } else {
+    renderMemberSessions(
+      sessionsResult.data || [],
+      registeredSessionsResult.data || [],
+    );
   }
 
   const activityErrors = [];
@@ -783,12 +1014,22 @@ async function loadMemberDashboard(user) {
           .map(
             (item) => `<article class="member-activity-item">
               <strong>Session registration</strong>
-              <span>${item.session_id && item.session_id !== "any" ? "Selected session" : "Any upcoming session"} · ${escapeHtml(item.mode || "Format not selected")}</span>
-              <small>${escapeHtml(new Date(item.created_at).toLocaleDateString())}</small>
+              <span>${item.session_id && item.session_id !== "any" ? "Selected session" : "Any upcoming session"} · ${esc(item.mode || "Format not selected")}</span>
+              <small>${esc(new Date(item.created_at).toLocaleDateString())}</small>
             </article>`,
           )
           .join("")
       : '<p class="member-empty">Your session registrations will appear here.</p>';
+  }
+
+  if (registeredSessionsResult.error) {
+    console.error(
+      "Could not load registered session IDs:",
+      registeredSessionsResult.error,
+    );
+    activityErrors.push(
+      `Registration status could not be checked: ${registeredSessionsResult.error.message}`,
+    );
   }
 
   $("#memberApplicationCount").textContent = applicationsResult.count ?? "—";
@@ -806,8 +1047,8 @@ async function loadMemberDashboard(user) {
           .map(
             (item) => `<article class="member-activity-item">
               <strong>${item.role === "partner" ? "Partner application" : "Volunteer application"}</strong>
-              <span>${escapeHtml(item.organisation || "Application received")}</span>
-              <small>${escapeHtml(new Date(item.created_at).toLocaleDateString())}</small>
+              <span>${esc(item.organisation || "Application received")}</span>
+              <small>${esc(new Date(item.created_at).toLocaleDateString())}</small>
             </article>`,
           )
           .join("")

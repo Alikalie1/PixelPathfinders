@@ -17,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20261124-1" />
+    <link rel="stylesheet" href="style.css?v=20261124-2" />
   </head>
   <body class="member-dashboard-page">
     <main class="member-portal">
@@ -29,45 +29,211 @@
           >Return to member login</a
         >
       </div>
-      <section id="memberDashboard" class="member-dashboard" hidden>
-        <div class="member-dashboard-heading">
-          <div>
-            <p class="member-eyebrow">YOUR ACCOUNT</p>
-            <h1 id="memberWelcome">Welcome</h1>
-            <p id="memberEmail" class="mut"></p>
+      <section id="memberDashboard" class="member-dashboard-layout" hidden>
+        <button
+          id="memberSidebarBackdrop"
+          class="member-sidebar-backdrop"
+          type="button"
+          aria-label="Close dashboard menu"
+          hidden
+        ></button>
+        <aside id="memberSidebar" class="member-sidebar">
+          <a class="member-sidebar-brand" href="index.html">
+            <img src="logo.png" alt="" width="36" height="36" />
+            <span>Pixel Pathfinders</span>
+          </a>
+          <div class="member-sidebar-user">
+            <span class="member-sidebar-avatar" aria-hidden="true">
+              <i class="fa-solid fa-user"></i>
+            </span>
+            <span id="memberSidebarName">Member</span>
+            <small id="memberSidebarEmail"></small>
           </div>
-          <div class="member-dashboard-actions">
-            <a class="btn sm" href="join.html#applications">Join a session</a>
-            <button class="btn sm member-signout" id="lo" type="button">
-              <i
-                class="fa-solid fa-arrow-right-from-bracket"
-                aria-hidden="true"
-              ></i>
-              Log out
+          <nav class="member-sidebar-nav" aria-label="Member dashboard">
+            <button
+              class="member-sidebar-link active"
+              type="button"
+              data-member-view="overview"
+              aria-current="page"
+            >
+              <i class="fa-solid fa-house" aria-hidden="true"></i> Overview
             </button>
+            <button
+              class="member-sidebar-link"
+              type="button"
+              data-member-view="sessions"
+            >
+              <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+              Available sessions
+            </button>
+            <button
+              class="member-sidebar-link"
+              type="button"
+              data-member-view="volunteer"
+            >
+              <i class="fa-solid fa-handshake-angle" aria-hidden="true"></i>
+              Volunteer
+            </button>
+            <button
+              class="member-sidebar-link"
+              type="button"
+              data-member-view="activity"
+            >
+              <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+              My activity
+            </button>
+            <button
+              class="member-sidebar-link"
+              type="button"
+              data-member-view="profile"
+            >
+              <i class="fa-solid fa-user-pen" aria-hidden="true"></i> My profile
+            </button>
+          </nav>
+          <button
+            class="member-sidebar-link member-sidebar-logout"
+            id="lo"
+            type="button"
+          >
+            <i
+              class="fa-solid fa-arrow-right-from-bracket"
+              aria-hidden="true"
+            ></i>
+            Log out
+          </button>
+        </aside>
+        <div class="member-dashboard-main">
+          <div class="member-dashboard-topbar">
+            <button
+              id="memberSidebarToggle"
+              class="btn sm member-sidebar-toggle"
+              type="button"
+              aria-controls="memberSidebar"
+              aria-expanded="false"
+            >
+              <i class="fa-solid fa-bars" aria-hidden="true"></i>
+              Menu
+            </button>
+            <div>
+              <p class="member-eyebrow">MEMBER DASHBOARD</p>
+              <h1 id="memberWelcome">Welcome</h1>
+              <p id="memberEmail" class="mut"></p>
+            </div>
           </div>
-        </div>
-        <div class="member-summary">
-          <article class="member-summary-card">
-            <span>Member number</span>
-            <strong id="memberNumber">—</strong>
-          </article>
-          <article class="member-summary-card">
-            <span>Session registrations</span>
-            <strong id="memberRegistrationCount">0</strong>
-          </article>
-          <article class="member-summary-card">
-            <span>Applications sent</span>
-            <strong id="memberApplicationCount">0</strong>
-          </article>
-        </div>
-        <div class="member-dashboard-grid">
-          <section class="member-dashboard-card">
-            <h2>Your profile</h2>
+          <section class="member-view" data-member-panel="overview">
+            <h2>Overview</h2>
+            <div class="member-summary">
+              <article class="member-summary-card">
+                <span>Member number</span>
+                <strong id="memberNumber">—</strong>
+              </article>
+              <article class="member-summary-card">
+                <span>Session registrations</span>
+                <strong id="memberRegistrationCount">0</strong>
+              </article>
+              <article class="member-summary-card">
+                <span>Applications sent</span>
+                <strong id="memberApplicationCount">0</strong>
+              </article>
+            </div>
+            <section class="member-dashboard-card member-profile-summary">
+              <div>
+                <p class="member-eyebrow">YOUR DETAILS</p>
+                <h3>Your profile</h3>
+                <p>
+                  <strong>Name</strong><span id="memberOverviewName"></span>
+                </p>
+                <p>
+                  <strong>Email</strong><span id="memberOverviewEmail"></span>
+                </p>
+                <p>
+                  <strong>Contact</strong><span id="memberOverviewPhone"></span>
+                </p>
+              </div>
+              <button
+                class="btn sm"
+                type="button"
+                data-open-member-view="profile"
+              >
+                Edit profile
+              </button>
+            </section>
+            <section class="member-dashboard-card member-overview-sessions">
+              <div class="member-section-heading">
+                <div>
+                  <p class="member-eyebrow">LEARN WITH US</p>
+                  <h3>Upcoming sessions</h3>
+                </div>
+                <button
+                  class="btn sm ghost"
+                  type="button"
+                  data-open-member-view="sessions"
+                >
+                  Browse sessions
+                </button>
+              </div>
+              <div id="memberUpcomingSessions" class="member-session-grid"></div>
+            </section>
+          </section>
+          <section class="member-view" data-member-panel="sessions" hidden>
+            <h2>Available sessions</h2>
             <p class="mut">
-              Keep your contact details and session preference up to date.
+              Browse upcoming sessions and register using your saved member
+              details.
             </p>
-            <form id="memberProfileForm" class="form member-form">
+            <form id="memberSessionForm" class="member-dashboard-card">
+              <div class="member-session-preferences">
+                <label
+                  >Contact phone<input
+                    id="memberSessionPhone"
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                    required
+                /></label>
+                <label
+                  >How will you join?<select name="mode">
+                    <option value="Virtual">Online</option>
+                    <option value="In person">In person</option>
+                  </select></label
+                >
+                <label
+                  >Your level<select name="level">
+                    <option value="Beginner">Beginner</option>
+                    <option value="Some skills">Some skills</option>
+                    <option value="Advanced">Advanced</option>
+                  </select></label
+                >
+              </div>
+              <label class="ck member-consent">
+                <input name="consent" type="checkbox" required />
+                <span>
+                  I agree to the session terms and consent to be contacted. If I
+                  am under 18, my parent or guardian knows I am registering.
+                </span>
+              </label>
+              <p
+                id="memberSessionStatus"
+                class="member-activity-status"
+                role="status"
+                aria-live="polite"
+              ></p>
+              <div
+                id="memberAvailableSessions"
+                class="member-session-grid"
+              ></div>
+            </form>
+          </section>
+          <section class="member-view" data-member-panel="volunteer" hidden>
+            <h2>Apply to volunteer</h2>
+            <p class="mut">
+              Tell us how you would like to help. Your application will be saved
+              to your account.
+            </p>
+            <form
+              id="memberVolunteerForm"
+              class="form member-form member-dashboard-card"
+            >
               <label
                 >Full name<input
                   name="full_name"
@@ -75,32 +241,111 @@
                   required
               /></label>
               <label
+                >Email<input
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  readonly
+                  required
+              /></label>
+              <label
                 >Phone or WhatsApp<input
                   name="phone"
                   type="tel"
                   autocomplete="tel"
+                  required
               /></label>
               <label
-                >Preferred session format<select name="mode">
+                >Pixel Pathfinders course completed<input
+                  name="course_completed"
+                  required
+              /></label>
+              <label
+                >Certificate number (optional)<input
+                  name="certificate_no"
+                  placeholder="PP-CERT-0001"
+              /></label>
+              <label
+                >Preferred volunteer format<select name="mode">
                   <option value="Virtual">Online</option>
                   <option value="Physical">In person</option>
                 </select></label
               >
+              <fieldset class="member-volunteer-areas">
+                <legend>Where would you like to help?</legend>
+                <label
+                  ><input
+                    type="checkbox"
+                    name="areas"
+                    value="Teaching support"
+                  />
+                  Teaching support</label
+                >
+                <label
+                  ><input type="checkbox" name="areas" value="Design" />
+                  Design</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="areas"
+                    value="Media and social media"
+                  />
+                  Media and social media</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="areas"
+                    value="Technical support"
+                  />
+                  Technical support</label
+                >
+                <label
+                  ><input type="checkbox" name="areas" value="Events" />
+                  Events</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="areas"
+                    value="Administration"
+                  />
+                  Administration</label
+                >
+              </fieldset>
+              <label
+                >Availability<input
+                  name="availability"
+                  placeholder="Days and times you are available"
+              /></label>
+              <label
+                >Message<textarea
+                  name="message"
+                  rows="4"
+                  placeholder="Tell us a little about yourself"
+              ></textarea></label>
+              <label class="ck member-consent">
+                <input name="consent" type="checkbox" required />
+                <span>
+                  I consent to being contacted about my volunteer application.
+                </span>
+              </label>
               <button class="btn member-submit" type="submit">
-                Save my profile
+                Send volunteer application
               </button>
+              <p
+                id="memberVolunteerStatus"
+                class="member-activity-status"
+                role="status"
+                aria-live="polite"
+              ></p>
             </form>
-            <p
-              id="memberProfileStatus"
-              class="member-activity-status"
-              role="status"
-              aria-live="polite"
-            ></p>
           </section>
-          <section class="member-dashboard-card">
-            <h2>Your activity</h2>
+          <section class="member-view" data-member-panel="activity" hidden>
+            <h2>My activity</h2>
             <p class="mut">
-              Your recent registrations and volunteer or partner applications.
+              Review your recent session registrations and applications.
             </p>
             <p
               id="memberActivityStatus"
@@ -108,29 +353,67 @@
               role="status"
               aria-live="polite"
             ></p>
-            <div class="member-activity-columns">
-              <div>
+            <div class="member-dashboard-grid">
+              <section class="member-dashboard-card">
                 <h3>Session registrations</h3>
-                <div
-                  id="memberRegistrations"
-                  class="member-activity-list"
-                ></div>
-              </div>
-              <div>
-                <h3>Applications</h3>
-                <div
-                  id="memberApplications"
-                  class="member-activity-list"
-                ></div>
-              </div>
+                <div id="memberRegistrations" class="member-activity-list"></div>
+              </section>
+              <section class="member-dashboard-card">
+                <h3>Volunteer applications</h3>
+                <div id="memberApplications" class="member-activity-list"></div>
+              </section>
             </div>
+          </section>
+          <section class="member-view" data-member-panel="profile" hidden>
+            <h2>My profile</h2>
+            <p class="mut">
+              Update your name, contact number and session preference.
+            </p>
+            <section class="member-dashboard-card">
+              <form id="memberProfileForm" class="form member-form">
+                <label
+                  >Full name<input
+                    name="full_name"
+                    autocomplete="name"
+                    required
+                /></label>
+                <label
+                  >Email address<input
+                    id="memberProfileEmail"
+                    type="email"
+                    autocomplete="email"
+                    readonly
+                /></label>
+                <label
+                  >Phone or WhatsApp<input
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                /></label>
+                <label
+                  >Preferred session format<select name="mode">
+                    <option value="Virtual">Online</option>
+                    <option value="Physical">In person</option>
+                  </select></label
+                >
+                <button class="btn member-submit" type="submit">
+                  Save my profile
+                </button>
+              </form>
+              <p
+                id="memberProfileStatus"
+                class="member-activity-status"
+                role="status"
+                aria-live="polite"
+              ></p>
+            </section>
           </section>
         </div>
       </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="app.js?v=20261124-1"></script>
+    <script src="app.js?v=20261124-2"></script>
     <script>
       auth();
     </script>

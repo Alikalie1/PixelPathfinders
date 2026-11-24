@@ -656,8 +656,230 @@ textarea:focus {
 .member-gate-link {
   font-weight: 600;
 }
-.member-dashboard-page .member-dashboard {
-  max-width: none;
+.member-portal {
+  width: 100%;
+  padding: 0;
+}
+.member-dashboard-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+}
+.member-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 16px;
+  color: #fff;
+  background: var(--n);
+}
+.member-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+  color: #fff;
+  font: 700 17px "Space Grotesk", Inter, sans-serif;
+  text-decoration: none;
+}
+.member-sidebar-brand img {
+  border-radius: 9px;
+}
+.member-sidebar-user {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  padding: 14px 10px;
+  border-block: 1px solid rgb(255 255 255 / 14%);
+  font-weight: 600;
+}
+.member-sidebar-avatar {
+  grid-row: span 2;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--n);
+  background: #d7edff;
+}
+.member-sidebar-user small {
+  overflow: hidden;
+  color: #cdd8ee;
+  font-size: 11px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+}
+.member-sidebar-nav {
+  display: grid;
+  gap: 6px;
+}
+.member-sidebar-link {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 0;
+  border-radius: 9px;
+  color: #d7dfef;
+  background: transparent;
+  font: 500 14px Inter, sans-serif;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.member-sidebar-link i {
+  width: 18px;
+  text-align: center;
+}
+.member-sidebar-link:hover,
+.member-sidebar-link.active {
+  color: #fff;
+  background: #1e5bb8;
+}
+.member-sidebar-logout {
+  margin-top: auto;
+  color: #fff;
+  border: 1px solid rgb(255 255 255 / 18%);
+}
+.member-dashboard-main {
+  width: min(100%, 1200px);
+  min-width: 0;
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 52px);
+}
+.member-dashboard-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.member-dashboard-topbar h1 {
+  margin: 0 0 4px;
+  font-size: clamp(25px, 3vw, 34px);
+}
+.member-dashboard-topbar p:last-child {
+  margin: 0;
+}
+.member-sidebar-toggle {
+  display: none;
+  flex: 0 0 auto;
+}
+.member-view > h2 {
+  margin: 0 0 8px;
+}
+.member-view > .mut {
+  margin: 0 0 20px;
+}
+.member-view > .member-dashboard-card {
+  margin: 18px 0;
+}
+.member-profile-summary,
+.member-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.member-profile-summary .member-eyebrow,
+.member-section-heading .member-eyebrow {
+  margin-top: 0;
+}
+.member-profile-summary h3,
+.member-section-heading h3 {
+  margin: 0 0 14px;
+}
+.member-profile-summary p {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 12px;
+  margin: 7px 0;
+  font-size: 14px;
+}
+.member-profile-summary p span {
+  color: var(--t);
+  overflow-wrap: anywhere;
+}
+.member-overview-sessions {
+  margin-top: 20px;
+}
+.member-session-preferences {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.member-session-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.member-session-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 17px;
+  border: 1px solid #e3e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
+}
+.member-session-card h3,
+.member-session-card p {
+  margin: 0;
+}
+.member-session-card h3 {
+  font-size: 17px;
+}
+.member-session-card p {
+  color: var(--t);
+  font-size: 13px;
+}
+.member-session-card .btn {
+  margin-top: auto;
+}
+.member-session-card .btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.member-session-preferences + .member-consent {
+  max-width: 720px;
+  margin: 0 0 16px;
+}
+.member-session-preferences + .member-consent input,
+.member-consent input {
+  width: auto;
+}
+.member-volunteer-areas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #c3cde0;
+  border-radius: 10px;
+}
+.member-volunteer-areas legend {
+  padding: 0 5px;
+  font-weight: 600;
+}
+.member-volunteer-areas label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 400;
+}
+.member-volunteer-areas input {
+  width: auto;
+}
+.member-sidebar-backdrop {
+  display: none;
 }
 .member-dashboard {
   padding: clamp(20px, 3vw, 32px);
@@ -929,6 +1151,49 @@ textarea:focus {
   .member-activity-columns {
     grid-template-columns: 1fr;
   }
+  .member-dashboard-layout {
+    display: block;
+  }
+  .member-sidebar {
+    position: fixed;
+    z-index: 90;
+    inset: 0 auto 0 0;
+    width: min(86vw, 290px);
+    transform: translateX(-105%);
+    transition: transform 0.2s ease;
+    box-shadow: 12px 0 32px rgb(15 27 45 / 18%);
+  }
+  .member-dashboard-layout.sidebar-open .member-sidebar {
+    transform: translateX(0);
+  }
+  .member-sidebar .member-sidebar-nav {
+    position: static;
+    align-items: stretch;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  .member-sidebar-backdrop {
+    position: fixed;
+    z-index: 80;
+    inset: 0;
+    display: block;
+    width: 100%;
+    border: 0;
+    background: rgb(15 27 45 / 55%);
+  }
+  .member-sidebar-toggle {
+    display: inline-flex;
+  }
+  .member-dashboard-main {
+    padding: 24px 20px;
+  }
+  .member-session-preferences {
+    grid-template-columns: 1fr;
+  }
+  .member-profile-summary {
+    flex-direction: column;
+  }
   .member-heading {
     align-items: flex-start;
     flex-direction: column;
@@ -947,6 +1212,9 @@ textarea:focus {
   }
   .member-dashboard {
     padding: 17px;
+  }
+  .member-dashboard-main {
+    padding: 20px 14px;
   }
   .member-dashboard-card {
     padding: 15px;

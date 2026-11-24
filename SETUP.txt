@@ -28,7 +28,8 @@ Database and admin setup
    authentication they are redirected to member-dashboard.html, a private
    dashboard without the public site header or footer. New account profile
    details are saved to profiles by the Auth signup trigger; members can update
-   those details and review their own registrations and applications there.
+   those details, view published upcoming sessions, register for a session,
+   apply as a volunteer, and review their own activity there.
 5. Registration, volunteer, partner and contact submissions are private.
    Row-level security lets visitors submit forms but only admins read them.
 
