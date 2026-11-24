@@ -17,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20261124-4" />
+    <link rel="stylesheet" href="style.css?v=20261124-5" />
     <link rel="stylesheet" href="accessibility.css?v=20261124-2" />
     <script src="accessibility.js?v=20261124-2"></script>
   </head>
@@ -55,42 +55,9 @@
       <section class="wrap sec">
         <h2 data-cms-key="sessions.heading">Upcoming sessions</h2>
         <div id="up" class="grid"></div>
-        <h2 data-cms-key="agenda.heading">Agenda cards</h2>
-        <div class="grid" data-cms-blocks="session_agenda">
-          <div class="card ag rv">
-            <h3>Team meeting</h3>
-            <small>Saturday 28 November 2026, 8:00 to 9:00 PM</small>
-            <ol>
-              <li><b>8:00</b> Welcome, vision and everyone’s views</li>
-              <li><b>8:10</b> Saturday sessions: day, time, platform</li>
-              <li><b>8:20</b> Roles for each session</li>
-              <li><b>8:35</b> First session topic</li>
-              <li><b>8:45</b> Website content and go-live date</li>
-              <li><b>8:55</b> Actions with names and deadlines</li>
-            </ol>
-          </div>
-          <div class="card ag rv">
-            <h3>Saturday session</h3>
-            <small>One hour, every week</small>
-            <ol>
-              <li><b>0:00</b> Welcome and house rules (Nelson)</li>
-              <li><b>0:05</b> Lesson (Francis or Isata)</li>
-              <li><b>0:35</b> Hands-on activity</li>
-              <li><b>0:50</b> Questions and answers</li>
-              <li><b>0:55</b> Announcements and thanks</li>
-            </ol>
-          </div>
-          <div class="card ag rv">
-            <h3>Session roles</h3>
-            <small>Everyone has a part</small>
-            <ol>
-              <li><b>Alikalie</b> Head and pitch, media</li>
-              <li><b>Nelson</b> Session host</li>
-              <li><b>Francis, Isata</b> Lecturers</li>
-              <li><b>Adama</b> Programme support</li>
-              <li><b>Momoh</b> Partnerships</li>
-            </ol>
-          </div>
+        <h2 data-cms-key="agenda.heading">Download agendas</h2>
+        <div class="agenda-downloads" data-cms-blocks="session_agenda">
+          <p class="mut">No downloadable agendas are available yet.</p>
         </div>
       </section>
     </main>
@@ -192,7 +159,7 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="app.js?v=20261124-4"></script>
+    <script src="app.js?v=20261124-5"></script>
     <script>
       upcoming("up", 12);
     </script>

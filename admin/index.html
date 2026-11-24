@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/admin/admin.css?v=20261124-2" />
+    <link rel="stylesheet" href="/admin/admin.css?v=20261124-3" />
     <link rel="stylesheet" href="/accessibility.css?v=20261124-2" />
     <script src="/accessibility.js?v=20261124-2"></script>
   </head>
@@ -352,8 +352,10 @@
               <p class="section-help">
                 Create and edit cards, pathway steps, values, agenda items and
                 form choices. To add a partner logo, choose Home: partner logos,
-                enter the partner name, then upload an image. Changes are stored
-                in Supabase.
+                enter the partner name, then upload an image. For Sessions:
+                downloadable agendas, add one item per agenda and upload its
+                PDF; only published items with a PDF appear on the public page.
+                Changes are stored in Supabase.
               </p>
               <form id="blockForm" class="editor-form">
                 <input name="id" type="hidden" />
@@ -369,7 +371,9 @@
                       Home: partner logos and names
                     </option>
                     <option value="about_values">About: values</option>
-                    <option value="session_agenda">Sessions: agenda</option>
+                    <option value="session_agenda">
+                      Sessions: downloadable agendas
+                    </option>
                     <option value="gallery_filters">Gallery: filters</option>
                     <option value="join_volunteer_areas">
                       Join: volunteer options
@@ -400,6 +404,30 @@
                     bucket.</small
                   ></label
                 >
+                <div
+                  id="agendaUploadFields"
+                  class="agenda-upload-fields wide"
+                  hidden
+                >
+                  <label
+                    >Agenda PDF URL<input
+                      name="agenda_pdf_url"
+                      type="url"
+                    /><small
+                      >The uploaded file URL is saved with this agenda.</small
+                    ></label
+                  >
+                  <label
+                    >Upload agenda PDF<input
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      data-agenda-pdf-upload-for="agenda_pdf_url"
+                    /><small
+                      >PDF files up to 10 MB are saved to the media bucket. Save
+                      the agenda entry after uploading.</small
+                    ></label
+                  >
+                </div>
                 <label
                   >Display order<input
                     name="sort_order"
@@ -409,8 +437,8 @@
                 <label class="wide"
                   >Extra data (JSON)<textarea name="extra" rows="3">{}</textarea
                   ><small
-                    >Optional icon or agenda items; leave as {} when
-                    unused.</small
+                    >Optional icon or other JSON data. Agenda PDFs are uploaded
+                    separately above.</small
                   ></label
                 >
                 <label class="check-field"
@@ -605,6 +633,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/config.js"></script>
-    <script src="/admin/admin.js?v=20261124-2"></script>
+    <script src="/admin/admin.js?v=20261124-3"></script>
   </body>
 </html>

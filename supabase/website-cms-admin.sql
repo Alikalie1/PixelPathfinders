@@ -595,7 +595,7 @@ insert into public.site_content (page_slug, content_key, label, value, input_typ
   ('session', 'page.title', 'Page title', 'Sessions and agenda', 'text', 1),
   ('session', 'page.subtitle', 'Page subtitle', 'Free Saturday sessions open to everybody.', 'textarea', 2),
   ('session', 'sessions.heading', 'Upcoming sessions heading', 'Upcoming sessions', 'text', 3),
-  ('session', 'agenda.heading', 'Agenda heading', 'Agenda cards', 'text', 4),
+  ('session', 'agenda.heading', 'Agenda heading', 'Download agendas', 'text', 4),
   ('session', 'meta.title', 'Browser tab title', 'Sessions | Pixel Pathfinders', 'text', 5),
   ('session', 'meta.description', 'Search description', 'Free Saturday sessions open to everybody.', 'textarea', 6),
   ('project', 'page.title', 'Page title', 'Our projects', 'text', 1),
@@ -708,6 +708,12 @@ insert into public.site_content (page_slug, content_key, label, value, input_typ
   ('join', 'form.and', 'Conjunction in consent text', 'and', 'text', 71),
   ('join', 'form.privacy_link', 'Privacy policy link label', 'Privacy Policy', 'text', 72)
 on conflict (page_slug, content_key) do nothing;
+
+update public.site_content
+set value = 'Download agendas'
+where page_slug = 'session'
+  and content_key = 'agenda.heading'
+  and value = 'Agenda cards';
 
 insert into public.content_blocks (seed_key, page_slug, section_key, title, body, extra, sort_order) values
   ('home-service-learning', 'index', 'home_services', 'Free digital skills', 'Practical Saturday sessions for everybody, online and in person.', '{"icon":"fa-solid fa-graduation-cap"}', 1),

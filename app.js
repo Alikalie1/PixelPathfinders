@@ -97,13 +97,14 @@ function renderContentBlock(section, block) {
     return `<li>${esc(block.title)}</li>`;
   }
   if (section === "session_agenda") {
-    const items = Array.isArray(block.extra?.items) ? block.extra.items : [];
-    return `<article class="card ag rv"><h3>${esc(block.title)}</h3><small>${esc(block.body)}</small><ol>${items
-      .map((item) => {
-        const [label, text] = String(item).split("|", 2);
-        return `<li><b>${esc(label)}</b> ${esc(text || "")}</li>`;
-      })
-      .join("")}</ol></article>`;
+    const fileUrl = String(block.extra?.agenda_pdf_url || "").trim();
+    const safeUrl = safeHref(fileUrl);
+    if (!fileUrl || safeUrl === "#") return "";
+    const [urlWithoutHash, hash = ""] = safeUrl.split("#", 2);
+    const separator = urlWithoutHash.includes("?") ? "&" : "?";
+    const downloadName = encodeURIComponent(`${block.title || "agenda"}.pdf`);
+    const downloadUrl = `${urlWithoutHash}${separator}download=${downloadName}${hash ? `#${hash}` : ""}`;
+    return `<a class="agenda-download" href="${esc(downloadUrl)}" download="${esc(`${block.title || "agenda"}.pdf`)}"><strong>${esc(block.title)}</strong>${block.body ? `<span>${esc(block.body)}</span>` : ""}<span class="agenda-download-label">Download PDF</span></a>`;
   }
   if (section === "gallery_filters") {
     return `<button class="btn sm" type="button" data-c="${esc(block.title)}">${esc(block.title)}</button>`;
@@ -221,6 +222,11 @@ async function loadSiteContent() {
         element.hidden = !visible;
       });
     });
+    $$("[data-social-panel]").forEach((panel) => {
+      panel.hidden = !Array.from(
+        panel.querySelectorAll("[data-site-setting]"),
+      ).some((element) => !element.hidden);
+    });
   }
 
   if (navigationResult.error)
@@ -274,6 +280,12 @@ async function loadSiteContent() {
       container.insertAdjacentHTML("beforeend", blockContent);
     else container.innerHTML = blockContent;
   });
+  const agendaDownloads = document.querySelector(
+    '[data-cms-blocks="session_agenda"]',
+  );
+  if (agendaDownloads && !agendaDownloads.querySelector(".agenda-download"))
+    agendaDownloads.innerHTML =
+      '<p class="mut">No downloadable agendas are available yet.</p>';
   watch();
 }
 

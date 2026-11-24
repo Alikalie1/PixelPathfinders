@@ -299,22 +299,42 @@ nav a.on {
   margin: 0 0 12px;
   aspect-ratio: 1;
 }
-.ag small {
-  color: var(--t);
+.agenda-downloads {
+  display: grid;
+  gap: 12px;
 }
-.ag ol {
-  list-style: none;
-  padding: 0;
-  margin: 14px 0 0;
+.agenda-download {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 18px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e1e6ef;
+  color: var(--n);
+  background: transparent;
+  text-decoration: none;
 }
-.ag li {
-  padding: 8px 0;
-  border-top: 1px solid #eef1f6;
-}
-.ag b {
+.agenda-download:hover {
   color: var(--b);
-  display: inline-block;
-  min-width: 78px;
+}
+.agenda-download > span:not(.agenda-download-label) {
+  color: var(--t);
+  font-size: 14px;
+}
+.agenda-download-label {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: var(--b);
+  font-weight: 700;
+}
+@media (max-width: 520px) {
+  .agenda-download {
+    grid-template-columns: 1fr;
+  }
+  .agenda-download-label {
+    grid-column: 1;
+    grid-row: auto;
+  }
 }
 .tag {
   display: inline-block;
@@ -360,6 +380,54 @@ nav a.on {
   display: grid;
   gap: 14px;
   margin: 18px 0;
+}
+.contact-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(250px, 0.7fr);
+  gap: clamp(24px, 5vw, 64px);
+  align-items: start;
+}
+.contact-layout > .form {
+  max-width: none;
+}
+.contact-socials {
+  margin: 18px 0;
+  padding: 22px;
+  border: 1px solid #e3e8f0;
+  border-radius: 12px;
+  background: #f7f8fa;
+}
+.contact-socials h2 {
+  margin: 0 0 8px;
+}
+.contact-socials p {
+  color: var(--t);
+}
+.contact-social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.contact-social-links a {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dbe2ee;
+  border-radius: 50%;
+  color: var(--b);
+  background: #fff;
+  font-size: 19px;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+.contact-social-links a:hover {
+  color: #fff;
+  background: var(--b);
+  transform: translateY(-2px);
 }
 label {
   display: grid;
@@ -1267,6 +1335,11 @@ textarea:focus {
   .member-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+@media (max-width: 760px) {
+  .contact-layout {
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 520px) {

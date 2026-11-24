@@ -35,6 +35,10 @@ Database and admin setup
    details are saved to profiles by the Auth signup trigger; members can update
    those details, view published upcoming sessions, register for a session,
    apply as a volunteer, and review their own activity there. The site settings
+   Manage downloadable session agendas from Content cards by selecting
+   Sessions: downloadable agendas, adding one entry per agenda, uploading its
+   PDF and saving the entry. Only published entries with an uploaded PDF appear
+   on the Sessions page. The site settings
    include the home hero stock photo URL; admins can replace it with a URL or
    upload an image to Supabase Storage. Public and admin pages include an
    accessibility menu for larger text, high contrast, and reduced motion.

@@ -307,6 +307,69 @@ async function uploadImageIntoField(input, file) {
   input.value = "";
 }
 
+async function uploadAgendaPdfIntoField(input, file) {
+  const isPdf =
+    file.name.toLowerCase().endsWith(".pdf") &&
+    (!file.type || file.type === "application/pdf");
+  if (!isPdf) {
+    setDashboardStatus("Choose a PDF file to upload.", "error");
+    input.value = "";
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    setDashboardStatus("Agenda PDFs must be 10 MB or smaller.", "error");
+    input.value = "";
+    return;
+  }
+  const form = input.closest("form");
+  const urlField = form?.elements.namedItem(input.dataset.agendaPdfUploadFor);
+  if (!(urlField instanceof HTMLInputElement)) {
+    setDashboardStatus("The agenda PDF URL field was not found.", "error");
+    input.value = "";
+    return;
+  }
+
+  const uniqueName = `agendas/${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`;
+  input.disabled = true;
+  setDashboardStatus("Uploading agenda PDF to Supabase Storage…");
+  try {
+    const { data, error } = await client.storage.from("media").upload(
+      uniqueName,
+      file,
+      {
+        cacheControl: "3600",
+        contentType: "application/pdf",
+        upsert: false,
+      },
+    );
+    if (error) {
+      console.error("Could not upload agenda PDF:", error);
+      setDashboardStatus(
+        "Agenda PDF upload failed. Check the media bucket and admin upload policy.",
+        "error",
+      );
+      return;
+    }
+    const { data: publicUrl } = client.storage
+      .from("media")
+      .getPublicUrl(data.path);
+    urlField.value = publicUrl.publicUrl;
+    setDashboardStatus(
+      "Agenda PDF uploaded. Save the agenda entry to publish its download link.",
+      "success",
+    );
+  } catch (error) {
+    console.error("Could not upload agenda PDF:", error);
+    setDashboardStatus(
+      "Agenda PDF upload failed. Check your connection and storage access.",
+      "error",
+    );
+  } finally {
+    input.disabled = false;
+    input.value = "";
+  }
+}
+
 async function loadOverview() {
   const collections = [
     ["Team members", "team_members"],
@@ -510,7 +573,11 @@ function renderBlockCard(block) {
     <h3>${escapeHtml(block.title)}</h3>
     <p>${escapeHtml(pageTitles.get(block.page_slug) || block.page_slug)} · ${escapeHtml(block.section_key)} · order ${escapeHtml(block.sort_order)}</p>
     <p>${escapeHtml(block.body)}</p>
-    <p>${block.is_published ? "Published" : "Hidden"}</p>
+    <p>${block.is_published ? "Published" : "Hidden"}${
+      block.section_key === "session_agenda"
+        ? ` · ${block.extra?.agenda_pdf_url ? "PDF uploaded" : "No PDF uploaded"}`
+        : ""
+    }</p>
     <div class="record-actions">
       <button class="button button-quiet" type="button" data-edit-block="${escapeHtml(block.id)}" title="Load this card into the editor so you can change and save it">Edit card</button>
       <button class="button button-danger" type="button" data-delete-block="${escapeHtml(block.id)}" title="Permanently remove this card from Supabase and the website">Delete card</button>
@@ -529,10 +596,22 @@ $("#blockForm").addEventListener("submit", async (event) => {
     setDashboardStatus("Extra data must be valid JSON.", "error");
     return;
   }
+  if (!extra || typeof extra !== "object" || Array.isArray(extra)) {
+    setDashboardStatus("Extra data must be a JSON object.", "error");
+    return;
+  }
+  const sectionKey = String(form.get("section_key") || "");
+  const agendaPdfUrl = String(form.get("agenda_pdf_url") || "").trim();
+  if (sectionKey === "session_agenda") {
+    if (agendaPdfUrl) extra.agenda_pdf_url = agendaPdfUrl;
+    else delete extra.agenda_pdf_url;
+  } else {
+    delete extra.agenda_pdf_url;
+  }
   const id = String(form.get("id") || "");
   const payload = {
     page_slug: form.get("page_slug"),
-    section_key: form.get("section_key"),
+    section_key: sectionKey,
     title: String(form.get("title") || "").trim(),
     body: String(form.get("body") || "").trim(),
     image_url: String(form.get("image_url") || "").trim() || null,
@@ -556,11 +635,30 @@ $("#blockForm").addEventListener("submit", async (event) => {
 });
 
 $("#blockForm").addEventListener("change", async (event) => {
+  if (!(event.target instanceof Element)) return;
+  const agendaUpload = event.target.closest("[data-agenda-pdf-upload-for]");
+  const agendaFile = agendaUpload?.files?.[0];
+  if (agendaUpload && agendaFile) {
+    await uploadAgendaPdfIntoField(agendaUpload, agendaFile);
+    return;
+  }
   const upload = event.target.closest("[data-image-upload-for]");
   const file = upload?.files?.[0];
   if (!upload || !file) return;
   await uploadImageIntoField(upload, file);
 });
+
+const blockForm = $("#blockForm");
+const agendaUploadFields = $("#agendaUploadFields");
+const blockSectionField = blockForm.elements.namedItem("section_key");
+function updateAgendaUploadFields() {
+  agendaUploadFields.hidden = blockSectionField.value !== "session_agenda";
+}
+blockSectionField.addEventListener("change", updateAgendaUploadFields);
+blockForm.addEventListener("reset", () =>
+  requestAnimationFrame(updateAgendaUploadFields),
+);
+updateAgendaUploadFields();
 
 $("#blocksList").addEventListener("click", async (event) => {
   const edit = event.target.closest("[data-edit-block]");
@@ -576,6 +674,9 @@ $("#blocksList").addEventListener("click", async (event) => {
       else if (key === "extra") field.value = JSON.stringify(value, null, 2);
       else field.value = value ?? "";
     }
+    form.elements.namedItem("agenda_pdf_url").value =
+      block.extra?.agenda_pdf_url || "";
+    updateAgendaUploadFields();
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   if (remove) {
