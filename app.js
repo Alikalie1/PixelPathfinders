@@ -106,6 +106,9 @@ function renderContentBlock(section, block) {
     const downloadUrl = `${urlWithoutHash}${separator}download=${downloadName}${hash ? `#${hash}` : ""}`;
     return `<a class="agenda-download" href="${esc(downloadUrl)}" download="${esc(`${block.title || "agenda"}.pdf`)}"><strong>${esc(block.title)}</strong>${block.body ? `<span>${esc(block.body)}</span>` : ""}<span class="agenda-download-label">Download PDF</span></a>`;
   }
+  if (section === "session_short_courses") {
+    return `<article class="card rv short-course-card"><h3>${esc(block.title)}</h3>${block.body ? `<p>${esc(block.body)}</p>` : ""}<a class="btn sm" href="join.html#applications">Register</a></article>`;
+  }
   if (section === "gallery_filters") {
     return `<button class="btn sm" type="button" data-c="${esc(block.title)}">${esc(block.title)}</button>`;
   }
@@ -291,6 +294,12 @@ async function loadSiteContent() {
   if (agendaDownloads && !agendaDownloads.querySelector(".agenda-download"))
     agendaDownloads.innerHTML =
       '<p class="mut">No downloadable agendas are available yet.</p>';
+  const shortCourses = document.querySelector(
+    '[data-cms-blocks="session_short_courses"]',
+  );
+  if (shortCourses && !shortCourses.querySelector(".short-course-card"))
+    shortCourses.innerHTML =
+      '<p class="mut">Short courses will be announced soon.</p>';
   watch();
 }
 

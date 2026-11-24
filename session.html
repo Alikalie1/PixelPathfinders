@@ -17,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20261124-5" />
+    <link rel="stylesheet" href="style.css?v=20261124-6" />
     <link rel="stylesheet" href="accessibility.css?v=20261124-2" />
     <script src="accessibility.js?v=20261124-2"></script>
   </head>
@@ -56,37 +56,11 @@
         <h2 data-cms-key="sessions.heading">Upcoming sessions</h2>
         <div id="up" class="grid"></div>
         <h2>Short courses</h2>
-        <div class="grid short-course-grid">
-          <article class="card rv short-course-card">
-            <h3>Climate 101 for tech people</h3>
-            <p><strong>Duration:</strong> 3 hours</p>
-            <p><strong>For:</strong> Developers and technology beginners</p>
-            <a class="btn sm" href="join.html#applications">Register</a>
-          </article>
-          <article class="card rv short-course-card">
-            <h3>Weather and data for developers</h3>
-            <p><strong>Duration:</strong> 4 hours</p>
-            <p><strong>For:</strong> Developers who work with data</p>
-            <a class="btn sm" href="join.html#applications">Register</a>
-          </article>
-          <article class="card rv short-course-card">
-            <h3>Building for low bandwidth</h3>
-            <p><strong>Duration:</strong> 3 hours</p>
-            <p><strong>For:</strong> Web and mobile builders</p>
-            <a class="btn sm" href="join.html#applications">Register</a>
-          </article>
-          <article class="card rv short-course-card">
-            <h3>Designing with farmers and fishers</h3>
-            <p><strong>Duration:</strong> 4 hours</p>
-            <p><strong>For:</strong> Designers, innovators and community researchers</p>
-            <a class="btn sm" href="join.html#applications">Register</a>
-          </article>
-          <article class="card rv short-course-card">
-            <h3>Pitching your idea</h3>
-            <p><strong>Duration:</strong> 2 hours</p>
-            <p><strong>For:</strong> Students, founders and project teams</p>
-            <a class="btn sm" href="join.html#applications">Register</a>
-          </article>
+        <div
+          class="grid short-course-grid"
+          data-cms-blocks="session_short_courses"
+        >
+          <p class="mut">Short courses will be announced soon.</p>
         </div>
         <h2 data-cms-key="agenda.heading">Download agendas</h2>
         <div class="agenda-downloads" data-cms-blocks="session_agenda">
@@ -192,7 +166,7 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="app.js?v=20261124-5"></script>
+    <script src="app.js?v=20261124-6"></script>
     <script>
       upcoming("up", 12);
     </script>
