@@ -561,6 +561,51 @@ textarea:focus {
     Inter,
     sans-serif;
 }
+.mission-card {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.problem-card,
+.focus-card,
+.join-choice-card,
+.short-course-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.problem-card i,
+.focus-card i,
+.join-choice-card i {
+  margin-bottom: 14px;
+}
+.focus-card .btn,
+.join-choice-card .btn,
+.short-course-card .btn {
+  margin-top: auto;
+}
+.project-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.chip-filter {
+  padding: 8px 14px;
+  border: 1px solid #c3cde0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--n);
+  font: 600 14px Inter, sans-serif;
+  cursor: pointer;
+}
+.chip-filter:hover,
+.chip-filter.active {
+  border-color: var(--b);
+  background: var(--b);
+  color: #fff;
+}
 .values {
   display: flex;
   flex-wrap: wrap;

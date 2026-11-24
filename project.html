@@ -46,10 +46,19 @@
       <section class="ph">
         <div class="wrap">
           <h1 data-cms-key="page.title">Our projects</h1>
-          <p data-cms-key="page.subtitle">What we are building and teaching.</p>
+          <p data-cms-key="page.subtitle">Our projects turn ideas into tools for real community problems.</p>
         </div>
       </section>
-      <section class="wrap sec"><div id="pj" class="grid"></div></section>
+      <section class="wrap sec">
+        <div class="project-filters" id="projectFilters" aria-label="Filter projects">
+          <button class="chip-filter active" type="button" data-project-filter="all" aria-pressed="true">All projects</button>
+          <button class="chip-filter" type="button" data-project-filter="innovation" aria-pressed="false">Innovation</button>
+          <button class="chip-filter" type="button" data-project-filter="entrepreneurship" aria-pressed="false">Entrepreneurship</button>
+          <button class="chip-filter" type="button" data-project-filter="tech" aria-pressed="false">Tech skills</button>
+          <button class="chip-filter" type="button" data-project-filter="climate" aria-pressed="false">Climate and agriculture</button>
+        </div>
+        <div id="pj" class="grid" aria-live="polite"></div>
+      </section>
     </main>
     <footer class="ft">
       <div class="wrap fg">
@@ -119,7 +128,7 @@
               data-site-href=""
               ><i class="fa-brands fa-github" aria-hidden="true"></i></a
             ><a
-              href="mailto:hello@example.com"
+              href="#"
               aria-label="Email"
               data-site-setting="contact_email"
               data-site-href="mailto:"
@@ -153,6 +162,36 @@
       list("projects", "pj", (x) =>
         card(x.image_url, x.title, x.summary, x.status),
       );
+      document.addEventListener("DOMContentLoaded", () => {
+        const filters = document.querySelector("#projectFilters");
+        if (!filters) return;
+        filters.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-project-filter]");
+          if (!button) return;
+          filters.querySelectorAll("[data-project-filter]").forEach((item) => {
+            const active = item === button;
+            item.classList.toggle("active", active);
+            item.setAttribute("aria-pressed", String(active));
+          });
+          const filter = button.dataset.projectFilter;
+          const keywords = {
+            innovation: ["innovation", "idea", "prototype", "solution"],
+            entrepreneurship: ["entrepreneur", "business", "venture", "investment"],
+            tech: ["tech", "digital", "software", "app", "website", "skills"],
+            climate: ["climate", "agriculture", "farmer", "fisher", "weather"],
+          }[filter];
+          document.querySelectorAll("#pj .card").forEach((cardElement) => {
+            if (filter === "all") {
+              cardElement.hidden = false;
+              return;
+            }
+            const text = cardElement.textContent.toLowerCase();
+            cardElement.hidden = !keywords.some((keyword) =>
+              text.includes(keyword),
+            );
+          });
+        });
+      });
     </script>
   </body>
 </html>

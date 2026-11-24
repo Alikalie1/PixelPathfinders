@@ -217,7 +217,12 @@ async function loadSiteContent() {
       }
     });
     Object.entries(socialIcons).forEach(([name, settingKey]) => {
-      const visible = settings.get(`show_social_${name}`) !== "false";
+      const configuredValue = String(settings.get(settingKey) || "").trim();
+      const placeholderValues = ["#", "hello@example.com"];
+      const visible =
+        settings.get(`show_social_${name}`) !== "false" &&
+        configuredValue !== "" &&
+        !placeholderValues.includes(configuredValue.toLowerCase());
       $$(`[data-site-setting="${settingKey}"]`).forEach((element) => {
         element.hidden = !visible;
       });
