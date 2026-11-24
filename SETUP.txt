@@ -11,7 +11,8 @@ Database and admin setup
    the website content, admin-role, website-data and form-submission schema,
    enables row-level security, promotes that existing account to super admin,
    enables member profiles and private, account-owned registration history, and
-   adds social icon visibility settings. Rerun after making CMS schema updates.
+   adds social icon visibility settings and the homepage hero image setting.
+   Rerun after making CMS schema updates.
    If an earlier run stopped with an error, rerun the updated file. Do not run
    this file from browser code.
 3. Authenticate the Supabase CLI with `supabase login`, then deploy the admin
@@ -37,6 +38,9 @@ Database and admin setup
    include the home hero stock photo URL; admins can replace it with a URL or
    upload an image to Supabase Storage. Public and admin pages include an
    accessibility menu for larger text, high contrast, and reduced motion.
+   Page text selection, copying and dragging are restricted; form controls
+   remain selectable. This browser-side restriction is a deterrent, not
+   protection against screenshots or access to page source.
 5. Registration, volunteer, partner and contact submissions are private.
    Row-level security lets visitors submit forms but only admins read them.
 

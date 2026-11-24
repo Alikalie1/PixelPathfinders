@@ -13,6 +13,23 @@
   text-decoration: none;
 }
 
+body,
+body * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body :is(
+    input,
+    textarea,
+    select,
+    [contenteditable]:not([contenteditable="false"]),
+    [role="textbox"]
+  ) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .a11y-skip-link:focus {
   transform: translateY(0);
 }

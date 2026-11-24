@@ -1,4 +1,22 @@
 (function () {
+  const editableSelector =
+    'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]';
+  const isEditableTarget = (target) =>
+    target instanceof Element && Boolean(target.closest(editableSelector));
+  const preventPageCopy = (event) => {
+    if (!isEditableTarget(event.target)) event.preventDefault();
+  };
+
+  document.addEventListener("copy", preventPageCopy, true);
+  document.addEventListener("cut", preventPageCopy, true);
+  document.addEventListener(
+    "dragstart",
+    (event) => {
+      if (!isEditableTarget(event.target)) event.preventDefault();
+    },
+    true,
+  );
+
   const storageKey = "pixelPathfinders.accessibility";
   const root = document.documentElement;
   const preferences = { textSize: 0, highContrast: false, reduceMotion: false };
@@ -32,6 +50,8 @@
       textStatus.textContent = `Text size: ${["Standard", "Large", "Larger"][preferences.textSize]}`;
   }
 
+  applyPreferences();
+
   function savePreferences() {
     try {
       localStorage.setItem(storageKey, JSON.stringify(preferences));
@@ -58,7 +78,7 @@
     widget.className = "a11y-widget";
     widget.innerHTML = `
       <summary><span aria-hidden="true">Aa</span> Accessibility</summary>
-      <div class="a11y-panel" aria-label="Accessibility settings">
+      <div class="a11y-panel" role="group" aria-label="Accessibility settings">
         <p class="a11y-title">Display and motion</p>
         <div class="a11y-text-controls" role="group" aria-label="Text size">
           <button type="button" data-a11y-action="text-down" aria-label="Decrease text size">A−</button>
