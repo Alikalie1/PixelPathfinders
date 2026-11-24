@@ -592,14 +592,14 @@ function auth() {
         $("#memberWelcome").textContent =
           user.user_metadata?.full_name || user.email?.split("@")[0] || "Member";
         $("#memberEmail").textContent = user.email || "";
+        await loadMemberDashboard(user);
         $("#memberDashboard").hidden = false;
         $("#memberGate").hidden = true;
-        await loadMemberDashboard(user);
       })
       .catch((error) => {
         console.error("Could not verify member session:", error);
         setGateStatus(
-          "We could not verify your sign-in. Please return to the login page and try again.",
+          "We could not load your dashboard. Please return to login and try again.",
           "err",
         );
       });
@@ -751,7 +751,7 @@ async function loadMemberDashboard(user) {
   if (profileResult.error) {
     console.error("Could not load member profile:", profileResult.error);
     profileStatus.textContent =
-      "Your profile could not be loaded. Run the latest member dashboard migration.";
+      `Your profile could not be loaded: ${profileResult.error.message} Run the latest member dashboard migration.`;
     profileStatus.className = "member-activity-status err";
   } else if (profileResult.data) {
     const form = $("#memberProfileForm");
@@ -775,7 +775,7 @@ async function loadMemberDashboard(user) {
       registrationsResult.error,
     );
     activityErrors.push(
-      "Your registrations could not be loaded. Run the latest member dashboard migration.",
+      `Your registrations could not be loaded: ${registrationsResult.error.message} Run the latest member dashboard migration.`,
     );
   } else {
     $("#memberRegistrations").innerHTML = registrationsResult.data.length
@@ -798,7 +798,7 @@ async function loadMemberDashboard(user) {
       applicationsResult.error,
     );
     activityErrors.push(
-      "Your applications could not be loaded. Run the latest member dashboard migration.",
+      `Your applications could not be loaded: ${applicationsResult.error.message} Run the latest member dashboard migration.`,
     );
   } else {
     $("#memberApplications").innerHTML = applicationsResult.data.length
