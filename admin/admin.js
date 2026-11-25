@@ -62,6 +62,7 @@ const recordDefinitions = {
       ["summary", "Summary", "textarea"],
       ["status", "Status", "text"],
       ["image_url", "Image URL", "url"],
+      ["project_url", "Project URL", "url"],
       ["is_published", "Published", "checkbox"],
     ],
   },
@@ -73,6 +74,8 @@ const recordDefinitions = {
       ["session_date", "Date and time", "datetime-local", true],
       ["platform", "Platform", "text"],
       ["link", "Session link", "url"],
+      ["image_url", "Image URL", "url"],
+      ["registration_redirect_url", "After-registration redirect URL", "text"],
       ["is_published", "Published", "checkbox"],
     ],
   },
@@ -865,11 +868,17 @@ function buildRecordFields(table) {
       const control =
         type === "textarea"
           ? `<textarea name="${key}" rows="3"${required ? " required" : ""}></textarea>`
-          : `<input name="${key}" type="${type}"${required ? " required" : ""}>`;
+          : `<input name="${key}" type="${type}"${key === "registration_redirect_url" ? ' placeholder="/thank-you.html or https://example.com/thank-you"' : ""}${required ? " required" : ""}>`;
       const upload = ["photo_url", "image_url"].includes(key)
         ? `<label class="upload-field wide">Upload image<input type="file" accept="image/*" data-image-upload-for="${key}"><small>Upload an image (up to 8 MB) to Supabase Storage. Saving the item publishes this image URL.</small></label>`
         : "";
-      return `<label>${escapeHtml(label)}${control}</label>${upload}`;
+      const help =
+        key === "project_url"
+          ? "<small>Optional link opened by the project card’s View project button.</small>"
+          : key === "registration_redirect_url"
+            ? "<small>Optional URL to open after someone successfully registers for this session.</small>"
+            : "";
+      return `<label>${escapeHtml(label)}${control}${help}</label>${upload}`;
     })
     .join("");
 }

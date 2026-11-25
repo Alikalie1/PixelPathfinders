@@ -157,10 +157,10 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="app.js?v=20261124-5"></script>
+    <script src="app.js?v=20261125-1"></script>
     <script>
       list("projects", "pj", (x) =>
-        card(x.image_url, x.title, x.summary, x.status),
+        card(x.image_url, x.title, x.summary, x.status, x.project_url),
       );
       document.addEventListener("DOMContentLoaded", () => {
         const filters = document.querySelector("#projectFilters");

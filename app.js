@@ -27,6 +27,17 @@ function safeHref(value) {
     : "#";
 }
 
+function safeRedirectUrl(value) {
+  const href = String(value || "").trim();
+  if (!href) return "";
+  try {
+    const url = new URL(href, location.href);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 function renderNavigation(locationName, items) {
   const headingSetting = {
     footer: "footer_explore_label",
@@ -407,8 +418,10 @@ if (
     requestAnimationFrame(f);
   })();
 }
-const card = (img, t, p, tag) =>
-  `<div class="card rv">${img ? `<img src="${esc(img)}" alt="${esc(t)}" loading="lazy">` : ""}${tag ? `<span class="tag">${esc(tag)}</span>` : ""}<h3>${esc(t)}</h3><p>${esc(p)}</p></div>`;
+const card = (img, t, p, tag, href) => {
+  const projectUrl = safeRedirectUrl(href);
+  return `<div class="card rv">${img ? `<img src="${esc(img)}" alt="${esc(t)}" loading="lazy">` : ""}${tag ? `<span class="tag">${esc(tag)}</span>` : ""}<h3>${esc(t)}</h3><p>${esc(p)}</p>${projectUrl ? `<a class="btn sm" href="${esc(projectUrl)}" target="_blank" rel="noopener noreferrer">View project</a>` : ""}</div>`;
+};
 async function list(tb, id, fn, ord = "created_at") {
   const el = $("#" + id);
   if (!db) {
@@ -489,7 +502,7 @@ async function upcoming(id, n) {
       ? data
           .map(
             (s) =>
-              `<div class="card rv"><span class="tag">${esc(s.platform || "Online")}</span><h3>${esc(s.title)}</h3><p>${new Date(s.session_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" })}</p><p>${esc(s.topic)}</p><a class="btn sm" href="join.html?session=${encodeURIComponent(s.id)}#applications">Register</a></div>`,
+              `<div class="card rv">${s.image_url ? `<img src="${esc(s.image_url)}" alt="${esc(s.title)}" loading="lazy">` : ""}<span class="tag">${esc(s.platform || "Online")}</span><h3>${esc(s.title)}</h3><p>${new Date(s.session_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" })}</p><p>${esc(s.topic)}</p><a class="btn sm" href="join.html?session=${encodeURIComponent(s.id)}#applications">Register</a></div>`,
           )
           .join("")
       : '<p class="mut">New sessions will be announced soon.</p>';
@@ -1159,6 +1172,7 @@ function registrationForms() {
   const participantStatus = $("#participantStatus");
   const volunteerStatus = $("#volunteerStatus");
   const sessionSelect = $("#p-session");
+  const sessionRedirectUrls = new Map();
   let selectedSession = new URLSearchParams(location.search).get("session");
   document.addEventListener("site-cms-loaded", () => {
     const option = sessionSelect.querySelector('option[value="any"]');
@@ -1251,7 +1265,7 @@ function registrationForms() {
     if (!db) return;
     const { data, error } = await db
       .from("sessions")
-      .select("id, title, session_date")
+      .select("id, title, session_date, registration_redirect_url")
       .gte("session_date", new Date().toISOString())
       .eq("is_published", true)
       .order("session_date", { ascending: true });
@@ -1264,6 +1278,11 @@ function registrationForms() {
       return;
     }
 
+    sessionRedirectUrls.clear();
+    (data || []).forEach((session) => {
+      const redirectUrl = safeRedirectUrl(session.registration_redirect_url);
+      if (redirectUrl) sessionRedirectUrls.set(session.id, redirectUrl);
+    });
     sessionSelect.innerHTML =
       `<option value="any" data-cms-key="form.any_session">${esc(cmsValues.get("form.any_session") || "Any upcoming session")}</option>` +
       (data || [])
@@ -1288,7 +1307,7 @@ function registrationForms() {
       level: values.get("level"),
       goals: String(values.get("goals") || "").trim() || null,
       consent: values.get("consent") === "on",
-    });
+    }, sessionRedirectUrls.get(String(values.get("session_id") || "")));
   });
 
   volunteerForm.addEventListener("submit", (event) => {
@@ -1316,7 +1335,7 @@ function registrationForms() {
   loadSessions();
 }
 
-async function submitRegistration(event, formElement, table, row) {
+async function submitRegistration(event, formElement, table, row, redirectUrl) {
   event.preventDefault();
   const status = $(".status", formElement);
   const button = $('button[type="submit"]', formElement);
@@ -1354,6 +1373,10 @@ async function submitRegistration(event, formElement, table, row) {
         : "Thank you. We’ve received your application and will contact you soon.";
     status.className = "status ok";
     status.hidden = false;
+    if (table === "participants" && redirectUrl) {
+      location.assign(redirectUrl);
+      return;
+    }
     formElement.reset();
     if (table === "volunteers") {
       const selectedRole = $('input[name="role"]:checked', formElement);

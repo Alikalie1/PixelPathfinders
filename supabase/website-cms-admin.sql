@@ -142,8 +142,11 @@ create table if not exists public.volunteers (
 
 alter table public.team_members add column if not exists is_published boolean not null default true;
 alter table public.projects add column if not exists is_published boolean not null default true;
+alter table public.projects add column if not exists project_url text;
 alter table public.gallery_items add column if not exists is_published boolean not null default true;
 alter table public.sessions add column if not exists is_published boolean not null default true;
+alter table public.sessions add column if not exists image_url text;
+alter table public.sessions add column if not exists registration_redirect_url text;
 alter table public.participants
   add column if not exists user_id uuid references auth.users(id) on delete set null;
 alter table public.volunteers
