@@ -1225,6 +1225,52 @@ $("#recordList").addEventListener("click", async (event) => {
 
 $("#inboxType").addEventListener("change", loadInbox);
 
+const inboxTableLabels = {
+  messages: "Contact message",
+  participants: "Session registration",
+  volunteers: "Volunteer or partner application",
+  profiles: "Member account",
+};
+const inboxFieldLabels = {
+  age_group: "Age group",
+  certificate_no: "Certificate number",
+  course_completed: "Course completed",
+  created_at: "Submitted",
+  full_name: "Full name",
+  member_no: "Member number",
+  organisation: "Organisation",
+  session_id: "Session reference",
+};
+
+function formatInboxValue(key, value) {
+  if (key === "consent") return value ? "Consent given" : "Not given";
+  if (value === null || value === undefined || value === "") return "Not provided";
+  if (Array.isArray(value))
+    return value.length
+      ? `<span class="submission-chip-list">${value
+          .map(
+            (item) =>
+              `<span class="submission-chip">${escapeHtml(item)}</span>`,
+          )
+          .join("")}</span>`
+      : "Not provided";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "object") return escapeHtml(JSON.stringify(value));
+  return escapeHtml(value);
+}
+
+function formatInboxDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? escapeHtml(value)
+    : escapeHtml(
+        new Intl.DateTimeFormat(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(date),
+      );
+}
+
 async function loadInbox() {
   const table = $("#inboxType").value;
   const query = client.from(table).select("*");
@@ -1245,15 +1291,43 @@ async function loadInbox() {
           record.name ||
           record.email ||
           "Submission";
-        const body = escapeHtml(JSON.stringify(record, null, 2));
+        const details = Object.entries(record)
+          .filter(([key]) => !["id", "user_id", "created_at"].includes(key))
+          .map(([key, value]) => {
+            const label =
+              inboxFieldLabels[key] ||
+              key
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, (letter) => letter.toUpperCase());
+            const wide =
+              ["goals", "message", "availability"].includes(key) ||
+              (typeof value === "string" && value.length > 100);
+            return `<div class="submission-detail${wide ? " wide" : ""}"><dt>${escapeHtml(label)}</dt><dd>${formatInboxValue(key, value)}</dd></div>`;
+          })
+          .join("");
+        const submittedAt = record.created_at
+          ? `<time datetime="${escapeHtml(record.created_at)}">${formatInboxDate(record.created_at)}</time>`
+          : "";
+        const memberNumber = record.member_no
+          ? `<span class="submission-reference">Member #${escapeHtml(record.member_no)}</span>`
+          : "";
         return `<article class="record-card">
-        <h3>${escapeHtml(title)}</h3>
-        <pre>${body}</pre>
+        <header class="submission-card-header">
+          <div class="submission-identity">
+            <span class="submission-marker" aria-hidden="true">${table === "profiles" ? "ID" : "IN"}</span>
+            <div><p class="submission-type">${escapeHtml(inboxTableLabels[table] || "Submission")}</p><h3>${escapeHtml(title)}</h3></div>
+          </div>
+          ${memberNumber}
+        </header>
+        <dl class="submission-details">${details || '<div class="submission-detail"><dt>Details</dt><dd>No additional details provided.</dd></div>'}</dl>
+        <footer class="submission-card-footer">
+          ${submittedAt ? `<span class="submission-date">Received ${submittedAt}</span>` : "<span></span>"}
         ${
           table === "profiles"
             ? ""
             : `<div class="record-actions"><button class="button button-danger" type="button" data-delete-submission="${escapeHtml(record.id)}" title="Permanently delete this submission from Supabase">Delete submission</button></div>`
         }
+        </footer>
       </article>`;
       })
       .join("") || '<p class="muted">No submissions yet.</p>';
