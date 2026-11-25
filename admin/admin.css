@@ -251,9 +251,24 @@ h3 {
     border-color 150ms ease;
 }
 
+.tab::after {
+  margin-left: auto;
+  color: #aebbd1;
+  content: "→";
+  transition:
+    color 150ms ease,
+    transform 150ms ease;
+}
+
 .tab:hover {
   color: #fff;
   background: rgb(255 255 255 / 8%);
+}
+
+.tab:hover::after,
+.tab.active::after {
+  color: #fff;
+  transform: translateX(3px);
 }
 
 .tab.active {
@@ -387,6 +402,16 @@ h3 {
 .button-primary {
   color: #fff;
   background: var(--blue);
+}
+
+.button-primary[type="submit"]::after {
+  display: inline-block;
+  content: "→";
+  transition: transform 150ms ease;
+}
+
+.button-primary[type="submit"]:hover::after {
+  transform: translateX(3px);
 }
 
 .button-primary:hover {
@@ -815,6 +840,12 @@ a:focus-visible {
   font-size: 12px;
 }
 
+.record-actions [data-edit-record]::after,
+.record-actions [data-edit-block]::after,
+.record-actions [data-edit-navigation]::after {
+  content: "↓";
+}
+
 .quick-actions {
   margin-top: 24px;
   display: grid;
@@ -823,8 +854,9 @@ a:focus-visible {
 }
 
 .quick-action {
+  position: relative;
   min-height: 100px;
-  padding: 16px;
+  padding: 16px 42px 16px 16px;
   display: block;
   border: 1px solid #dfe6ef;
   border-radius: 10px;
@@ -833,9 +865,24 @@ a:focus-visible {
   text-align: left;
 }
 
+.quick-action::after {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  color: var(--blue);
+  content: "→";
+  font-size: 19px;
+  transform: translateY(-50%);
+  transition: transform 150ms ease;
+}
+
 .quick-action:hover {
   border-color: #9ab6e1;
   background: #f7faff;
+}
+
+.quick-action:hover::after {
+  transform: translate(3px, -50%);
 }
 
 .quick-action strong,

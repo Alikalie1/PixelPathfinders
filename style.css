@@ -948,6 +948,26 @@ textarea:focus {
   color: #fff;
   background: #1e5bb8;
 }
+.member-sidebar-link[data-member-view]::after {
+  margin-left: auto;
+  color: #aebbd1;
+  content: "→";
+  transition: transform 150ms ease;
+}
+.member-sidebar-link[data-member-view]:hover::after,
+.member-sidebar-link[data-member-view].active::after {
+  color: #fff;
+  transform: translateX(3px);
+}
+.member-dashboard-layout .btn:not(.member-sidebar-toggle)::after {
+  display: inline-block;
+  margin-left: 0.55em;
+  content: "→";
+  transition: transform 150ms ease;
+}
+.member-dashboard-layout .btn:not(.member-sidebar-toggle):hover::after {
+  transform: translateX(3px);
+}
 .member-sidebar-logout {
   margin-top: auto;
   color: #fff;

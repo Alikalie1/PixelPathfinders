@@ -1375,7 +1375,11 @@ async function submitRegistration(event, formElement, table, row, redirectUrl) {
         : "Thank you. We’ve received your application and will contact you soon.";
     status.className = "status ok";
     status.hidden = false;
-    if (table === "participants" && redirectUrl) {
+    const hasSelectedSession =
+      typeof row.session_id === "string" &&
+      row.session_id.trim() !== "" &&
+      row.session_id !== "any";
+    if (table === "participants" && hasSelectedSession && redirectUrl) {
       location.assign(redirectUrl);
       return;
     }

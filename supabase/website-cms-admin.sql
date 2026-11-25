@@ -796,8 +796,8 @@ do $seed_team$
 begin
   if not exists (select 1 from public.team_members) then
     insert into public.team_members (name, role, bio, sort_order) values
-      ('Alikalie Fofanah', 'CEO and Lead Founder', 'Leads the team, presents our mission and vision, and handles media.', 1),
-      ('Nelson Peter David', 'Project Coordinator', 'Hosts sessions and keeps programme records.', 2),
+      ('Alikalie Fofanah', 'Co-Founder', 'Head of Pixel Pathfinders, session host and media.', 1),
+      ('Nelson Bangura', 'Co-Founder', 'Session host and media.', 2),
       ('Francis Divine Johnson', 'Co-Founder', 'Lecturer and digital skills facilitator.', 3),
       ('Isata Vandi', 'Co-Founder', 'Lecturer and digital skills facilitator.', 4),
       ('Adama Bangura', 'Programme Manager', 'Supports programme materials and online technical help.', 5),
@@ -825,4 +825,10 @@ begin
   on conflict (user_id) do update
   set role = 'super_admin';
 end;
-$bootstrap_super_admin$;
+$bootstrap_super_admin$; hose that attend, attend there for the previous years, since when you attend there, they have 1 to 3 months, you need to be, to have some practical with the company because the institution is owned by the company. So you need to be doing the duty and other stuff with the company, but now nothing like that. So I just went on our own. So, even this, but this boy, I don't know if you know him, Barry.
+No, yeah, I know that.
+Yeah, he's a bro. Same village.
+Yeah, he told me.
+Okay.
+He told me.
+So even as like, vice minister, he said, I've been consulting about my, that I'm going to attend each other. He was advising me not to come because there is no proper lecture in there again. No more practical. I- I think the only people that are benefiting me in this institution is the ITs, the IT. I only focus on the IT and likewise this, free scholarship people. It's the ITs, the IT. I only focus on the IT, and I likewise this, free scholarship people from CDC, this place, Kuala. Is the, this school, this school here, call it school, but it's in December. They give some students scholarship to come and do their practical work. They are only focusing on them. Every day they are doing it because they are having fast money.
