@@ -719,6 +719,13 @@ function auth() {
         if (error) throw error;
         sessionStatus.textContent = "Your session registration was received.";
         sessionStatus.className = "member-activity-status ok";
+        const redirectUrl = safeRedirectUrl(
+          button.dataset.registrationRedirect,
+        );
+        if (redirectUrl) {
+          location.assign(redirectUrl);
+          return;
+        }
         await loadMemberDashboard(currentMember);
       } catch (error) {
         console.error("Could not register member for session:", error);
@@ -1006,7 +1013,7 @@ function renderMemberSessions(sessions, registrations) {
               <h3>${esc(session.title)}</h3>
               <p class="member-session-date">${esc(new Date(session.session_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" }))}</p>
               ${session.topic ? `<p>${esc(session.topic)}</p>` : ""}
-              <button class="btn sm" type="button" data-register-session="${esc(session.id)}" ${registered ? "disabled" : ""}>
+              <button class="btn sm" type="button" data-register-session="${esc(session.id)}" data-registration-redirect="${esc(safeRedirectUrl(session.registration_redirect_url))}" ${registered ? "disabled" : ""}>
                 ${registered ? "Already registered" : "Register for session"}
               </button>
             </article>`;
@@ -1045,7 +1052,7 @@ async function loadMemberDashboard(user) {
       .limit(5),
     db
       .from("sessions")
-      .select("id, title, topic, session_date, platform")
+      .select("id, title, topic, session_date, platform, registration_redirect_url")
       .gte("session_date", new Date().toISOString())
       .eq("is_published", true)
       .order("session_date", { ascending: true }),
