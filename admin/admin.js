@@ -24,6 +24,7 @@ let currentRole = null;
 let activeRecordTable = "team_members";
 const sections = {
   overview: ["Overview", "See submissions and website activity in one place."],
+  home_hero: ["Home hero", "Edit the home page headline, buttons, statistics and image."],
   pages: ["Pages", "Choose which website pages are visible to visitors."],
   content: ["Page text", "Edit the copy and labels shown across each page."],
   blocks: [
@@ -35,12 +36,38 @@ const sections = {
     "Site settings",
     "Manage the brand, contact details and social links.",
   ],
-  records: [
-    "Website data",
-    "Manage team, projects, sessions and gallery content.",
-  ],
-  inbox: ["Form inbox", "Review contact messages and visitor applications."],
+  team: ["Team", "Manage team members shown on the public website."],
+  projects: ["Projects", "Manage project cards and project links."],
+  sessions: ["Sessions", "Manage session details, images and redirects."],
+  gallery: ["Gallery", "Manage public gallery photos and captions."],
+  contact_messages: ["Contact messages", "Review and manage visitor messages."],
+  registrations: ["Registrations", "Review and manage session registrations."],
+  applications: ["Applications", "Review volunteer and partner applications."],
+  members: ["Members", "Review and manage member accounts."],
   admins: ["Administrator access", "Invite and manage website administrators."],
+};
+
+const sectionPanels = {
+  team: "records",
+  projects: "records",
+  sessions: "records",
+  gallery: "records",
+  contact_messages: "inbox",
+  registrations: "inbox",
+  applications: "inbox",
+  members: "inbox",
+};
+const recordSectionTables = {
+  team: "team_members",
+  projects: "projects",
+  sessions: "sessions",
+  gallery: "gallery_items",
+};
+const inboxSectionTables = {
+  contact_messages: "messages",
+  registrations: "participants",
+  applications: "volunteers",
+  members: "profiles",
 };
 
 const recordDefinitions = {
@@ -208,18 +235,20 @@ $$("[data-tab]").forEach((button) => {
 });
 
 async function openSection(section) {
-  const [title, description] = sections[section] || sections.overview;
+  const activeSection = sections[section] ? section : "overview";
+  const panelSection = sectionPanels[activeSection] || activeSection;
+  const [title, description] = sections[activeSection];
   $$("[data-tab]").forEach((tab) =>
-    tab.classList.toggle("active", tab.dataset.tab === section),
+    tab.classList.toggle("active", tab.dataset.tab === activeSection),
   );
   $$("[data-panel]").forEach(
-    (panel) => (panel.hidden = panel.dataset.panel !== section),
+    (panel) => (panel.hidden = panel.dataset.panel !== panelSection),
   );
   $("#sectionTitle").textContent = title;
   $("#sectionDescription").textContent = description;
   setDashboardStatus("");
   closeSidebar();
-  await loadSection(section);
+  await loadSection(activeSection);
 }
 
 function closeSidebar() {
@@ -244,13 +273,22 @@ $$("[data-open-tab]").forEach((button) => {
 
 async function loadSection(section) {
   if (section === "overview") return loadOverview();
+  if (section === "home_hero") return loadHeroEditor();
   if (section === "pages") return loadPagesPanel();
   if (section === "content") return loadContentEditor();
   if (section === "blocks") return loadBlocks();
   if (section === "navigation") return loadNavigation();
   if (section === "settings") return loadSettings();
-  if (section === "records") return loadRecords();
-  if (section === "inbox") return loadInbox();
+  if (recordSectionTables[section]) {
+    $("#recordType").value = recordSectionTables[section];
+    $("#recordForm").reset();
+    $("#recordForm").elements.id.value = "";
+    return loadRecords();
+  }
+  if (inboxSectionTables[section]) {
+    $("#inboxType").value = inboxSectionTables[section];
+    return loadInbox();
+  }
   if (section === "admins" && currentRole === "super_admin")
     return loadAdmins();
 }
@@ -495,6 +533,159 @@ async function loadContentEditor() {
   }
 }
 
+async function loadHeroEditor() {
+  const saveButton = $('#heroForm button[type="submit"]');
+  saveButton.disabled = true;
+  const [contentResult, settingsResult] = await Promise.all([
+    client
+      .from("site_content")
+      .select("content_key, label, value, input_type")
+      .eq("page_slug", "index")
+      .order("sort_order"),
+    client
+      .from("site_settings")
+      .select("setting_key, label, value")
+      .in("setting_key", [
+        "hero_image_url",
+        "founders_count",
+        "saturdays_count",
+        "open_percent",
+      ]),
+  ]);
+  if (contentResult.error || settingsResult.error) {
+    const error = contentResult.error || settingsResult.error;
+    console.error("Could not load home hero settings:", error);
+    $("#heroEditor").replaceChildren();
+    setDashboardStatus(
+      "Could not load all home hero settings. Check the website CMS database setup.",
+      "error",
+    );
+    return;
+  }
+
+  const settings = new Map(
+    settingsResult.data.map((setting) => [setting.setting_key, setting]),
+  );
+  const expectedContentKeys = [
+    "hero.founded",
+    "hero.title_prefix",
+    "hero.title_focus",
+    "hero.title_suffix",
+    "hero.body",
+    "hero.primary",
+    "hero.primary_url",
+    "hero.secondary",
+    "hero.secondary_url",
+    "stats.founders_label",
+    "stats.saturdays_label",
+    "stats.open_label",
+  ];
+  const contentOrder = new Map(
+    expectedContentKeys.map((key, index) => [key, index]),
+  );
+  const heroContent = contentResult.data.filter(
+    (item) =>
+      item.content_key.startsWith("hero.") ||
+      item.content_key.startsWith("stats."),
+  );
+  const orderedContent = [...heroContent].sort(
+    (left, right) =>
+      (contentOrder.get(left.content_key) ?? Number.MAX_SAFE_INTEGER) -
+      (contentOrder.get(right.content_key) ?? Number.MAX_SAFE_INTEGER),
+  );
+  const contentFields = orderedContent
+    .map((item) => {
+      const field =
+        item.input_type === "textarea"
+          ? `<textarea name="${escapeHtml(item.content_key)}" data-hero-content-key rows="3">${escapeHtml(item.value)}</textarea>`
+          : `<input name="${escapeHtml(item.content_key)}" data-hero-content-key type="${escapeHtml(item.input_type)}" value="${escapeHtml(item.value)}">`;
+      return `<label class="editor-field">${escapeHtml(item.label)}${field}</label>`;
+    })
+    .join("");
+  const imageSetting = settings.get("hero_image_url");
+  const imageField = imageSetting
+    ? `<div class="editor-field"><label>${escapeHtml(imageSetting.label)}<input name="hero_image_url" type="url" value="${escapeHtml(imageSetting.value)}"></label><label class="setting-upload">Upload replacement image<input type="file" accept="image/*" data-image-upload-for="hero_image_url"><small>Upload an image (up to 8 MB), then save the hero.</small></label></div>`
+    : "";
+  const statSettings = ["founders_count", "saturdays_count", "open_percent"]
+    .map((key) => settings.get(key))
+    .filter(Boolean)
+    .map(
+      (setting) =>
+        `<label class="editor-field">${escapeHtml(setting.label)}<input name="${escapeHtml(setting.setting_key)}" data-hero-setting type="number" value="${escapeHtml(setting.value)}"></label>`,
+    )
+    .join("");
+  $("#heroEditor").innerHTML = `${contentFields}${imageField}${statSettings}`;
+  const availableContentKeys = new Set(
+    heroContent.map((item) => item.content_key),
+  );
+  const missingSetting =
+    !imageSetting ||
+    ["founders_count", "saturdays_count", "open_percent"].some(
+      (key) => !settings.has(key),
+    );
+  const missingFields =
+    missingSetting ||
+    expectedContentKeys.some((key) => !availableContentKeys.has(key));
+  saveButton.disabled = missingFields;
+  if (missingFields) {
+    setDashboardStatus(
+      "Some hero fields are missing. Re-run the website CMS SQL setup, then reload this tab.",
+      "error",
+    );
+  }
+}
+
+$("#heroForm").addEventListener("change", async (event) => {
+  const upload =
+    event.target instanceof Element
+      ? event.target.closest("[data-image-upload-for]")
+      : null;
+  const file = upload?.files?.[0];
+  if (upload && file) await uploadImageIntoField(upload, file);
+});
+
+$("#heroForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const contentRows = $$("[data-hero-content-key]", form).map((field) => ({
+    content_key: field.name,
+    value: field.value,
+  }));
+  const settingRows = $$("[data-hero-setting]", form).map((field) => ({
+    setting_key: field.name,
+    value: field.value,
+  }));
+  const imageField = form.elements.namedItem("hero_image_url");
+  if (imageField) {
+    settingRows.push({
+      setting_key: "hero_image_url",
+      value: String(imageField.value || "").trim(),
+    });
+  }
+  const results = await Promise.all([
+    ...contentRows.map((row) =>
+      client
+        .from("site_content")
+        .update({ value: row.value })
+        .eq("page_slug", "index")
+        .eq("content_key", row.content_key),
+    ),
+    ...settingRows.map((row) =>
+      client
+        .from("site_settings")
+        .update({ value: row.value })
+        .eq("setting_key", row.setting_key),
+    ),
+  ]);
+  const failed = results.find((result) => result.error);
+  if (failed) {
+    console.error("Could not save home hero:", failed.error);
+    setDashboardStatus("Could not save all home hero changes.", "error");
+    return;
+  }
+  setDashboardStatus("Home hero saved.", "success");
+});
+
 function updatePagePreview() {
   const slug = $("#contentPage").value || "index";
   $("#pagePreviewLink").href = `/${slug}.html`;
@@ -513,7 +704,15 @@ async function loadContentRows() {
     setDashboardStatus("Could not load page text.", "error");
     return;
   }
-  $("#contentEditor").innerHTML = data
+  const pageContent =
+    slug === "index"
+      ? data.filter(
+          (item) =>
+            !item.content_key.startsWith("hero.") &&
+            !item.content_key.startsWith("stats."),
+        )
+      : data;
+  $("#contentEditor").innerHTML = pageContent
     .map((item) => {
       const field =
         item.input_type === "textarea"
@@ -807,7 +1006,16 @@ async function loadSettings() {
     setDashboardStatus("Could not load site settings.", "error");
     return;
   }
-  $("#settingsEditor").innerHTML = data
+  const generalSettings = data.filter(
+    (setting) =>
+      ![
+        "hero_image_url",
+        "founders_count",
+        "saturdays_count",
+        "open_percent",
+      ].includes(setting.setting_key),
+  );
+  $("#settingsEditor").innerHTML = generalSettings
     .map((setting) => {
       const socialToggle = setting.setting_key.startsWith("show_social_");
       const control = socialToggle
@@ -815,8 +1023,6 @@ async function loadSettings() {
         : setting.input_type === "textarea"
           ? `<textarea name="${escapeHtml(setting.setting_key)}" rows="3">${escapeHtml(setting.value)}</textarea>`
           : `<input name="${escapeHtml(setting.setting_key)}" type="${escapeHtml(setting.input_type)}" value="${escapeHtml(setting.value)}">`;
-      if (setting.setting_key === "hero_image_url")
-        return `<div class="editor-field"><label>${escapeHtml(setting.label)}${control}</label><label class="setting-upload">Upload replacement hero image<input type="file" accept="image/*" data-image-upload-for="hero_image_url"><small>Upload an image (up to 8 MB) to Supabase Storage, then save site settings to publish it.</small></label></div>`;
       return `<label class="editor-field${socialToggle ? " check-field" : ""}">${escapeHtml(setting.label)}${control}</label>`;
     })
     .join("");

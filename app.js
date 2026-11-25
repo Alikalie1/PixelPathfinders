@@ -100,9 +100,7 @@ function renderContentBlock(section, block) {
     return `<li><h3>${esc(block.title)}</h3><p>${esc(block.body)}</p></li>`;
   }
   if (section === "home_partner_areas") {
-    return block.image_url
-      ? `<span class="partner-logo" title="${esc(block.title)}">${image}</span>`
-      : `<span class="partner-logo">${esc(block.title)}</span>`;
+    return `<span class="partner-logo">${esc(block.title)}</span>`;
   }
   if (section === "home_values") {
     return `<li>${esc(block.title)}</li>`;
@@ -174,6 +172,10 @@ async function loadSiteContent() {
     $$("[data-cms-key]").forEach((element) => {
       const value = values.get(element.dataset.cmsKey);
       if (value !== undefined) element.textContent = value;
+    });
+    $$("[data-cms-href]").forEach((element) => {
+      const value = values.get(element.dataset.cmsHref);
+      if (value !== undefined) element.setAttribute("href", safeHref(value));
     });
     $$("[data-cms-placeholder]").forEach((element) => {
       const value = values.get(element.dataset.cmsPlaceholder);

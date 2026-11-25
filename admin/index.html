@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/admin/admin.css?v=20261124-3" />
+    <link rel="stylesheet" href="/admin/admin.css?v=20261125-2" />
     <link rel="stylesheet" href="/accessibility.css?v=20261124-2" />
     <script src="/accessibility.js?v=20261124-2"></script>
   </head>
@@ -101,13 +101,17 @@
               </button>
             </div>
             <nav class="tabs" aria-label="Admin sections">
+              <button class="tab" type="button" data-tab="home_hero" title="Edit the home page hero">
+                <span class="nav-icon">01</span
+                ><span><strong>Home hero</strong><small>Headline, image and buttons</small></span>
+              </button>
               <button
                 class="tab active"
                 type="button"
                 data-tab="overview"
                 title="View site activity and submission totals"
               >
-                <span class="nav-icon">01</span
+                <span class="nav-icon">02</span
                 ><span
                   ><strong>Overview</strong
                   ><small>Activity at a glance</small></span
@@ -119,7 +123,7 @@
                 data-tab="pages"
                 title="Publish or temporarily hide website pages"
               >
-                <span class="nav-icon">02</span
+                <span class="nav-icon">03</span
                 ><span
                   ><strong>Pages</strong
                   ><small>Publish and visibility</small></span
@@ -131,7 +135,7 @@
                 data-tab="content"
                 title="Edit the headings, labels and text shown on each page"
               >
-                <span class="nav-icon">03</span
+                <span class="nav-icon">04</span
                 ><span
                   ><strong>Page text</strong
                   ><small>Headings and copy</small></span
@@ -143,7 +147,7 @@
                 data-tab="blocks"
                 title="Add, edit, reorder and publish page cards"
               >
-                <span class="nav-icon">04</span
+                <span class="nav-icon">05</span
                 ><span
                   ><strong>Content cards</strong
                   ><small>Sections and cards</small></span
@@ -155,7 +159,7 @@
                 data-tab="navigation"
                 title="Manage the header and footer links across the website"
               >
-                <span class="nav-icon">05</span
+                <span class="nav-icon">06</span
                 ><span
                   ><strong>Navigation</strong
                   ><small>Header and footer links</small></span
@@ -167,35 +171,43 @@
                 data-tab="settings"
                 title="Update brand, contact, social links and footer details"
               >
-                <span class="nav-icon">06</span
+                <span class="nav-icon">07</span
                 ><span
                   ><strong>Site settings</strong
                   ><small>Brand and contact</small></span
                 >
               </button>
-              <button
-                class="tab"
-                type="button"
-                data-tab="records"
-                title="Manage team members, projects, sessions and gallery items"
-              >
-                <span class="nav-icon">07</span
-                ><span
-                  ><strong>Website data</strong
-                  ><small>Team and media</small></span
-                >
-              </button>
-              <button
-                class="tab"
-                type="button"
-                data-tab="inbox"
-                title="Read and manage contact forms, registrations and applications"
-              >
+              <button class="tab" type="button" data-tab="team" title="Manage team members">
                 <span class="nav-icon">08</span
-                ><span
-                  ><strong>Form inbox</strong
-                  ><small>Messages and applications</small></span
-                >
+                ><span><strong>Team</strong><small>Team directory</small></span>
+              </button>
+              <button class="tab" type="button" data-tab="projects" title="Manage projects">
+                <span class="nav-icon">09</span
+                ><span><strong>Projects</strong><small>Project cards and links</small></span>
+              </button>
+              <button class="tab" type="button" data-tab="sessions" title="Manage sessions">
+                <span class="nav-icon">10</span
+                ><span><strong>Sessions</strong><small>Details, images and redirects</small></span>
+              </button>
+              <button class="tab" type="button" data-tab="gallery" title="Manage gallery items">
+                <span class="nav-icon">11</span
+                ><span><strong>Gallery</strong><small>Photos and captions</small></span>
+              </button>
+              <button class="tab" type="button" data-tab="contact_messages" title="Review contact messages">
+                <span class="nav-icon">12</span
+                ><span><strong>Contact messages</strong><small>Visitor messages</small></span>
+              </button>
+              <button class="tab" type="button" data-tab="registrations" title="Review session registrations">
+                <span class="nav-icon">13</span
+                ><span><strong>Registrations</strong><small>Session sign-ups</small></span>
+              </button>
+              <button class="tab" type="button" data-tab="applications" title="Review volunteer and partner applications">
+                <span class="nav-icon">14</span
+                ><span><strong>Applications</strong><small>Volunteers and partners</small></span>
+              </button>
+              <button class="tab" type="button" data-tab="members" title="Review member accounts">
+                <span class="nav-icon">15</span
+                ><span><strong>Members</strong><small>Member accounts</small></span>
               </button>
               <button
                 class="tab"
@@ -205,7 +217,7 @@
                 hidden
                 title="Invite or remove website administrators"
               >
-                <span class="nav-icon">09</span
+                <span class="nav-icon">16</span
                 ><span
                   ><strong>Admin access</strong
                   ><small>Manage administrators</small></span
@@ -252,6 +264,23 @@
               ></p>
             </div>
 
+            <section class="panel tab-panel" data-panel="home_hero" hidden>
+              <h2>Home hero</h2>
+              <p class="section-help">
+                Edit every item in the home page hero, including the headline,
+                button labels and destinations, statistics, and background image.
+              </p>
+              <form id="heroForm" class="stack">
+                <div id="heroEditor" class="editor-grid"></div>
+                <div class="form-actions">
+                  <button class="button button-primary" type="submit">
+                    Save home hero
+                  </button>
+                  <span class="button-help">Changes appear on the home page.</span>
+                </div>
+              </form>
+            </section>
+
             <section class="panel tab-panel" data-panel="overview">
               <h2>Website activity</h2>
               <p class="section-help">
@@ -263,34 +292,31 @@
                 <button
                   class="quick-action"
                   type="button"
-                  data-open-tab="inbox"
+                  data-open-tab="registrations"
                 >
-                  <strong>Review submissions</strong
+                  <strong>Review registrations</strong
                   ><span
-                    >Open the private inbox for visitor messages and
-                    applications.</span
+                    >Open the private inbox for session sign-ups.</span
                   >
                 </button>
                 <button
                   class="quick-action"
                   type="button"
-                  data-open-tab="records"
+                  data-open-tab="sessions"
                 >
-                  <strong>Update website data</strong
+                  <strong>Manage sessions</strong
                   ><span
-                    >Add or edit team members, projects, sessions and gallery
-                    items.</span
+                    >Add or edit session details, images and redirects.</span
                   >
                 </button>
                 <button
                   class="quick-action"
                   type="button"
-                  data-open-tab="content"
+                  data-open-tab="home_hero"
                 >
-                  <strong>Edit page text</strong
+                  <strong>Edit home hero</strong
                   ><span
-                    >Change the copy and labels displayed across each
-                    page.</span
+                    >Update the home page headline, buttons, statistics and image.</span
                   >
                 </button>
               </div>
@@ -311,7 +337,7 @@
                   <h2>Page text</h2>
                   <p class="section-help">
                     Edit page headings, descriptions, form labels and legal
-                    copy. Save changes to publish them to the website.
+                    copy. Home hero content has its own sidebar tab.
                   </p>
                 </div>
                 <div class="page-picker">
@@ -352,7 +378,9 @@
               <p class="section-help">
                 Create and edit cards, pathway steps, values, agenda items and
                 form choices. To add a partner logo, choose Home: partner logos,
-                enter the partner name, then upload an image. For Sessions:
+                enter the partner name, then upload an image. Partner names
+                remain public, but uploaded partner logos are intentionally
+                kept off the public page. For Sessions:
                 downloadable agendas, add one item per agenda and upload its
                 PDF; only published items with a PDF appear on the public page.
                 For Sessions: short courses, use the title for the course and
@@ -530,8 +558,8 @@
               <p class="section-help">
                 Edit the shared brand, contact information, social profile links
                 and footer. Use the social display checkboxes to show or hide
-                individual icons across the public website. Replace the home
-                hero photo with an image URL or upload one to Supabase Storage.
+                individual icons across the public website. Home hero image and
+                statistics are managed in the Home hero tab.
               </p>
               <form id="settingsForm" class="stack">
                 <div id="settingsEditor" class="editor-grid"></div>
@@ -641,6 +669,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/config.js"></script>
-    <script src="/admin/admin.js?v=20261125-1"></script>
+    <script src="/admin/admin.js?v=20261125-2"></script>
   </body>
 </html>

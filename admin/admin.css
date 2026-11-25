@@ -198,9 +198,12 @@ h3 {
   position: sticky;
   top: 88px;
   min-height: calc(100vh - 112px);
+  max-height: calc(100vh - 112px);
   padding: 17px 12px 13px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--navy);
   border-radius: 14px;
   color: #fff;
@@ -781,7 +784,9 @@ a:focus-visible {
     bottom: 0;
     left: 0;
     width: min(300px, calc(100vw - 56px));
+    height: 100vh;
     min-height: 0;
+    max-height: none;
     padding: 17px 13px;
     overflow-y: auto;
     border-radius: 0 14px 14px 0;
