@@ -1,5 +1,6 @@
 (function () {
   const consentStorageKey = "pixelpathfinders:cookie-consent:v1";
+  const consentVisitKey = "pixelpathfinders:cookie-consent-dismissed:this-visit";
   const optionalStorageKeys = [
     "pixelPathfinders.accessibility",
     "pixelpathfinders:member-dashboard-tour:v1:",
@@ -42,6 +43,34 @@
     }
   }
 
+  function isDashboardPage() {
+    const pathSegments = window.location.pathname
+      .toLowerCase()
+      .split("/")
+      .filter(Boolean);
+    return (
+      pathSegments.includes("admin") ||
+      pathSegments[pathSegments.length - 1] === "member-dashboard.html"
+    );
+  }
+
+  function wasDismissedThisVisit() {
+    try {
+      return window.sessionStorage.getItem(consentVisitKey) === "true";
+    } catch (error) {
+      console.error("Could not read cookie banner session state:", error);
+      return false;
+    }
+  }
+
+  function rememberDismissalThisVisit() {
+    try {
+      window.sessionStorage.setItem(consentVisitKey, "true");
+    } catch (error) {
+      console.error("Could not save cookie banner session state:", error);
+    }
+  }
+
   preferences = readPreferences();
 
   function savePreferences(functional) {
@@ -64,7 +93,10 @@
   };
 
   function initialize() {
+    if (isDashboardPage()) return;
+
     preferences = readPreferences();
+    const dismissedThisVisit = wasDismissedThisVisit();
 
     const banner = document.createElement("section");
     banner.className = "cookie-consent-banner";
@@ -85,7 +117,7 @@
     launcher.type = "button";
     launcher.textContent = "Cookie settings";
     launcher.setAttribute("aria-label", "Manage cookie and storage preferences");
-    launcher.hidden = !preferences;
+    launcher.hidden = !preferences && !dismissedThisVisit;
 
     const overlay = document.createElement("div");
     overlay.className = "cookie-settings-overlay";
@@ -133,6 +165,7 @@
 
     function saveChoice(functional) {
       const persisted = savePreferences(functional);
+      rememberDismissalThisVisit();
       banner.hidden = true;
       launcher.hidden = false;
       document.body.classList.remove("cookie-consent-open");
@@ -204,7 +237,7 @@
       }
     });
 
-    if (preferences) {
+    if (dismissedThisVisit) {
       banner.hidden = true;
       launcher.hidden = false;
     } else {
