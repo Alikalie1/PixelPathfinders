@@ -46,7 +46,7 @@ const sections = {
   event_registrations: ["Event registrations", "Review member RSVPs for published events."],
   applications: ["Applications", "Review volunteer and partner applications."],
   members: ["Members", "Review and manage member accounts."],
-  admins: ["Administrator access", "Invite and manage website administrators."],
+  admins: ["Administrator access", "Create admin accounts and manage access."],
 };
 
 const sectionPanels = {
@@ -159,8 +159,8 @@ function showDashboard() {
   $("#accountBar").hidden = false;
   $("#roleBadge").textContent = currentRole.replace("_", " ");
   $("#accountEmail").textContent = currentUser?.email || "";
-  $$("[data-super-admin]").forEach((item) => {
-    item.hidden = currentRole !== "super_admin";
+  $$("[data-admin]").forEach((item) => {
+    item.hidden = !["admin", "super_admin"].includes(currentRole);
   });
 }
 
@@ -345,17 +345,13 @@ const adminTourSteps = () => [
     description:
       "Review which signed-in members have reserved a place at each event. This private inbox includes the event title and the member’s submitted contact details.",
   },
-  ...(currentRole === "super_admin"
-    ? [
-        {
-          target: '[data-tab="admins"]',
-          sidebar: true,
-          title: "Admin access",
-          description:
-            "Super admins can invite or remove website administrators here. Only grant access to people who should manage website data.",
-        },
-      ]
-    : []),
+  {
+    target: '[data-tab="admins"]',
+    sidebar: true,
+    title: "Admin access",
+    description:
+      "Admins can create other administrator accounts here. Only super admins can remove admin access.",
+  },
   {
     target: ".sidebar-site-link",
     sidebar: true,
@@ -550,7 +546,7 @@ async function loadSection(section) {
     $("#inboxType").value = inboxSectionTables[section];
     return loadInbox();
   }
-  if (section === "admins" && currentRole === "super_admin")
+  if (section === "admins" && ["admin", "super_admin"].includes(currentRole))
     return loadAdmins();
 }
 
@@ -1508,14 +1504,17 @@ const inboxFieldLabels = {
   created_at: "Submitted",
   event_title: "Event",
   full_name: "Full name",
-  member_no: "Member number",
+  member_no: "Member ID",
   organisation: "Organisation",
   session_id: "Session reference",
+  volunteer_no: "Volunteer ID",
 };
 
 function formatInboxValue(key, value) {
   if (key === "consent") return value ? "Consent given" : "Not given";
   if (value === null || value === undefined || value === "") return "Not provided";
+  if (key === "member_no") return `PPM${escapeHtml(value)}`;
+  if (key === "volunteer_no") return escapeHtml(value);
   if (Array.isArray(value))
     return value.length
       ? `<span class="submission-chip-list">${value
@@ -1584,8 +1583,10 @@ async function loadInbox() {
           ? `<time datetime="${escapeHtml(record.created_at)}">${formatInboxDate(record.created_at)}</time>`
           : "";
         const memberNumber = record.member_no
-          ? `<span class="submission-reference">Member #${escapeHtml(record.member_no)}</span>`
-          : "";
+          ? `<span class="submission-reference">Member ID PPM${escapeHtml(record.member_no)}</span>`
+          : record.volunteer_no
+            ? `<span class="submission-reference">Volunteer ID ${escapeHtml(record.volunteer_no)}</span>`
+            : "";
         return `<article class="record-card">
         <header class="submission-card-header">
           <div class="submission-identity">
@@ -1627,14 +1628,14 @@ $("#inboxList").addEventListener("click", async (event) => {
 });
 
 async function loadAdmins() {
-  if (currentRole !== "super_admin") return;
+  if (!["admin", "super_admin"].includes(currentRole)) return;
   const { data, error } = await client.functions.invoke("invite-admin", {
     body: { action: "list" },
   });
   if (error) {
     console.error("Could not load admin accounts:", error);
     setDashboardStatus(
-      "Could not load admin accounts. Check the invite-admin function deployment.",
+      "Could not load admin accounts. Check the admin management function deployment.",
       "error",
     );
     return;
@@ -1646,7 +1647,7 @@ async function loadAdmins() {
         <h3>${escapeHtml(admin.email || admin.user_id)}</h3>
         <p>${escapeHtml(admin.role)} · added ${escapeHtml(new Date(admin.created_at).toLocaleDateString())}</p>
         ${
-          admin.role === "admin"
+          admin.role === "admin" && currentRole === "super_admin"
             ? `<div class="record-actions"><button class="button button-danger" type="button" data-remove-admin="${escapeHtml(admin.user_id)}">Remove admin</button></div>`
             : ""
         }
@@ -1655,19 +1656,19 @@ async function loadAdmins() {
       .join("") || '<p class="muted">No admin accounts were returned.</p>';
 }
 
-$("#inviteForm").addEventListener("submit", async (event) => {
+$("#createAdminForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
-  const email = String(new FormData(form).get("email") || "")
-    .trim()
-    .toLowerCase();
+  const values = new FormData(form);
+  const email = String(values.get("email") || "").trim().toLowerCase();
+  const password = String(values.get("password") || "");
   const { data, error } = await client.functions.invoke("invite-admin", {
-    body: { action: "invite", email },
+    body: { action: "create", email, password },
   });
   if (error) {
-    console.error("Could not invite admin:", error);
+    console.error("Could not create admin:", error);
     setDashboardStatus(
-      "Could not invite this admin. Check function deployment and permissions.",
+      "Could not create this admin account. Check the email, password, and your admin permissions.",
       "error",
     );
     return;

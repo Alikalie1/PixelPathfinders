@@ -1,7 +1,4 @@
-import {
-  createClient,
-  type User,
-} from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -36,7 +33,7 @@ Deno.serve(async (request: Request) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const authorization = request.headers.get("Authorization");
   if (!projectUrl || !anonKey || !serviceRoleKey || !authorization) {
-    return respond(500, "Admin invitation is not configured.");
+    return respond(500, "Admin account management is not configured.");
   }
 
   try {
@@ -61,8 +58,8 @@ Deno.serve(async (request: Request) => {
       console.error("Could not verify admin role:", roleError.message);
       return respond(500, "Could not verify your admin permissions.");
     }
-    if (callerRole?.role !== "super_admin") {
-      return respond(403, "Only a super admin can manage admin accounts.");
+    if (!callerRole || !["admin", "super_admin"].includes(callerRole.role)) {
+      return respond(403, "Only an admin can manage admin accounts.");
     }
 
     const body = await request.json();
@@ -94,11 +91,14 @@ Deno.serve(async (request: Request) => {
     }
 
     if (body.action === "remove") {
+      if (callerRole.role !== "super_admin") {
+        return respond(403, "Only a super admin can remove admin access.");
+      }
       const userId =
         typeof body.user_id === "string" ? body.user_id.trim() : "";
       if (!userId) return respond(400, "Choose an admin account to remove.");
       if (userId === caller.id) {
-        return respond(400, "You cannot remove your own super admin access.");
+        return respond(400, "You cannot remove your own admin access.");
       }
 
       const { data: targetRole, error: targetError } = await adminClient
@@ -126,58 +126,36 @@ Deno.serve(async (request: Request) => {
       return respond(200, "Admin access removed.");
     }
 
-    if (body.action !== "invite") {
-      return respond(400, "Choose invite or remove.");
+    if (body.action !== "create") {
+      return respond(400, "Choose create or remove.");
     }
     const email =
       typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return respond(400, "Enter a valid email address.");
     }
-
-    let targetUser: User | null = null;
-    for (let page = 1; page <= 50; page += 1) {
-      const { data, error: usersError } =
-        await adminClient.auth.admin.listUsers({ page, perPage: 1000 });
-      if (usersError) {
-        console.error("Could not search Auth users:", usersError.message);
-        return respond(500, "Could not look up the Auth account.");
-      }
-      targetUser =
-        data.users.find((user) => user.email?.toLowerCase() === email) || null;
-      if (targetUser || data.users.length < 1000) break;
+    const password = typeof body.password === "string" ? body.password : "";
+    if (password.length < 12 || password.length > 128) {
+      return respond(400, "Use an initial password between 12 and 128 characters.");
     }
 
-    if (!targetUser) {
-      const { data, error: inviteError } =
-        await adminClient.auth.admin.inviteUserByEmail(email);
-      if (inviteError) {
-        console.error("Could not invite Auth user:", inviteError.message);
-        return respond(400, "Supabase could not send the invitation.");
-      }
-      targetUser = data.user;
+    const {
+      data: { user: targetUser },
+      error: createError,
+    } = await adminClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (createError) {
+      console.error("Could not create Auth user:", createError.message);
+      return respond(
+        409,
+        "Could not create this account. Confirm the email is unused and the password meets the project requirements.",
+      );
     }
     if (!targetUser)
-      return respond(500, "Supabase did not return the invited user.");
-
-    const { data: existingRole, error: existingRoleError } = await adminClient
-      .from("admin_roles")
-      .select("role")
-      .eq("user_id", targetUser.id)
-      .maybeSingle();
-    if (existingRoleError) {
-      console.error(
-        "Could not check existing admin:",
-        existingRoleError.message,
-      );
-      return respond(500, "Could not check the account's current role.");
-    }
-    if (existingRole?.role === "super_admin") {
-      return respond(400, "That account is already a super admin.");
-    }
-    if (existingRole?.role === "admin") {
-      return respond(409, "That account is already an admin.");
-    }
+      return respond(500, "Supabase did not return the created user.");
 
     const { error: insertError } = await adminClient
       .from("admin_roles")
@@ -188,16 +166,27 @@ Deno.serve(async (request: Request) => {
       });
     if (insertError) {
       console.error("Could not assign admin role:", insertError.message);
+      const { error: cleanupError } = await adminClient.auth.admin.deleteUser(
+        targetUser.id,
+      );
+      if (cleanupError) {
+        console.error(
+          "Could not remove Auth account after admin role assignment failed:",
+          cleanupError.message,
+        );
+        return respond(
+          500,
+          "The account was created, but admin access could not be assigned or rolled back. Contact a super admin.",
+        );
+      }
       return respond(
         500,
-        "The Auth account exists, but admin access was not assigned.",
+        "Could not assign admin access. The newly created account was removed.",
       );
     }
     return respond(
       200,
-      targetUser.email === email
-        ? `Admin access granted to ${email}.`
-        : "Admin invitation sent.",
+      `Admin account created for ${email}. Share the initial password securely.`,
     );
   } catch (error) {
     console.error(

@@ -1484,7 +1484,9 @@ async function loadMemberDashboard(user) {
       .limit(5),
     db
       .from("volunteers")
-      .select("id, role, organisation, created_at", { count: "exact" })
+      .select("id, role, organisation, volunteer_no, created_at", {
+        count: "exact",
+      })
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(5),
@@ -1521,7 +1523,9 @@ async function loadMemberDashboard(user) {
     renderMemberProfile(user, null);
   } else if (profileResult.data) {
     renderMemberProfile(user, profileResult.data);
-    $("#memberNumber").textContent = profileResult.data.member_no || "—";
+    $("#memberNumber").textContent = profileResult.data.member_no
+      ? `PPM${profileResult.data.member_no}`
+      : "—";
   } else {
     profileStatus.textContent =
       "Your profile record is missing. Run the latest member dashboard migration.";
@@ -1618,7 +1622,7 @@ async function loadMemberDashboard(user) {
             (item) => `<article class="member-activity-item">
               <strong>${item.role === "partner" ? "Partner application" : "Volunteer application"}</strong>
               <span>${esc(item.organisation || "Application received")}</span>
-              <small>${esc(new Date(item.created_at).toLocaleDateString())}</small>
+              <small>${item.volunteer_no ? `Volunteer ID ${esc(item.volunteer_no)} · ` : ""}${esc(new Date(item.created_at).toLocaleDateString())}</small>
             </article>`,
           )
           .join("")

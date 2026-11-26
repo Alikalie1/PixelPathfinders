@@ -223,9 +223,9 @@
                 class="tab"
                 type="button"
                 data-tab="admins"
-                data-super-admin
+                data-admin
                 hidden
-                title="Invite or remove website administrators"
+                title="Add or manage website administrators"
               >
                 <span class="nav-icon">18</span
                 ><span
@@ -666,23 +666,37 @@
             <section class="panel tab-panel" data-panel="admins" hidden>
               <h2>Administrator access</h2>
               <p class="section-help">
-                Invite a trusted person by email. They need a Supabase account
-                before signing in to manage the website.
+                Create an administrator account using their email and an initial
+                password. Admins can add other admins; only super admins can
+                remove admin access.
               </p>
-              <form id="inviteForm" class="inline-form">
+              <form id="createAdminForm" class="inline-form">
                 <label
                   >New admin email<input
                     name="email"
                     type="email"
+                    autocomplete="email"
+                    required /></label
+                ><label
+                  >Initial password<input
+                    name="password"
+                    type="password"
+                    minlength="12"
+                    maxlength="128"
+                    autocomplete="new-password"
                     required /></label
                 ><button
                   class="button button-primary"
                   type="submit"
-                  title="Invite this person and grant website admin access"
+                  title="Create this account and grant website admin access"
                 >
-                  Invite administrator
+                  Create administrator
                 </button>
               </form>
+              <p class="section-help">
+                Use at least 12 characters. Share the initial password with the
+                new admin securely; it is not emailed or shown again.
+              </p>
               <div id="adminsList" class="record-list"></div>
             </section>
           </div>
@@ -731,6 +745,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/config.js"></script>
-    <script src="/admin/admin.js?v=20261126-3"></script>
+    <script src="/admin/admin.js?v=20261126-4"></script>
   </body>
 </html>
