@@ -360,6 +360,17 @@ h3 {
   font-size: 14px;
 }
 
+.page-heading-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.page-heading-actions .status {
+  margin: 0;
+}
+
 .section-help,
 .page-heading p,
 .login-panel > p {
@@ -397,6 +408,79 @@ h3 {
 
 .button:hover {
   transform: translateY(-1px);
+}
+
+.admin-tour-scrim {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  background: rgb(7 16 31 / 72%);
+}
+
+.admin-tour-card {
+  position: fixed;
+  z-index: 10002;
+  top: 50%;
+  left: 50%;
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: clamp(20px, 4vw, 30px);
+  overflow-y: auto;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 28%);
+}
+
+.admin-tour-scrim[hidden],
+.admin-tour-card[hidden] {
+  display: none;
+}
+
+.admin-tour-card h2 {
+  margin-bottom: 10px;
+}
+
+.admin-tour-card > p:not(.admin-tour-step) {
+  margin-bottom: 22px;
+  color: var(--muted);
+}
+
+.admin-tour-step {
+  margin-bottom: 7px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-tour-controls {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-tour-controls #adminTourSkip {
+  margin-right: auto;
+}
+
+.admin-tour-controls button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-tour-highlight {
+  position: relative !important;
+  z-index: 10001 !important;
+  outline: 3px solid #ffd166 !important;
+  outline-offset: 3px;
+  pointer-events: none !important;
+}
+
+.dashboard-sidebar.admin-tour-sidebar-target,
+body.admin-tour-header-target .admin-header {
+  z-index: 10001;
 }
 
 .button-primary {
@@ -1017,6 +1101,13 @@ a:focus-visible {
     flex-direction: column;
     gap: 4px;
     margin-bottom: 14px;
+  }
+
+  .page-heading-actions {
+    width: 100%;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
   .page-heading .status {

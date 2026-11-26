@@ -183,6 +183,10 @@ async function verifyAdmin(user) {
   currentRole = data.role;
   showDashboard();
   await loadOverview();
+  if (!adminTourAutoStarted && !hasSeenAdminTour()) {
+    adminTourAutoStarted = true;
+    window.setTimeout(startAdminTour, 0);
+  }
   return true;
 }
 
@@ -247,6 +251,234 @@ $$("[data-tab]").forEach((button) => {
     if (button.hidden) return;
     await openSection(button.dataset.tab);
   });
+});
+
+const adminTourScrim = $("#adminTourScrim");
+const adminTourCard = $("#adminTourCard");
+const adminTourStepsLabel = $("#adminTourStep");
+const adminTourTitle = $("#adminTourTitle");
+const adminTourDescription = $("#adminTourDescription");
+const adminTourBack = $("#adminTourBack");
+const adminTourSkip = $("#adminTourSkip");
+const adminTourNext = $("#adminTourNext");
+const adminTourStorageKey = () =>
+  `pixelpathfinders:admin-dashboard-tour:v1:${currentUser.id}`;
+const isMobileAdminDashboard = () =>
+  window.matchMedia("(max-width: 760px)").matches;
+const adminTourSteps = () => [
+  {
+    target: "#adminTourStart",
+    title: "Admin dashboard tour",
+    description:
+      "This walkthrough explains the main dashboard sections. Use Next and Back to explore, or Skip tour to close it. Reopen it any time with the Dashboard tour button. On small screens, Dashboard menu opens the section list.",
+  },
+  {
+    target: '[data-tab="overview"]',
+    sidebar: true,
+    title: "Overview",
+    description:
+      "See totals for website content and incoming submissions. The quick-action buttons open registrations, sessions, or the home hero directly.",
+  },
+  {
+    target: '[data-tab="home_hero"]',
+    sidebar: true,
+    title: "Home hero",
+    description:
+      "Edit the homepage headline, buttons and destinations, statistics, and hero image. Choose Save home hero to publish your changes.",
+  },
+  {
+    target: '[data-tab="pages"]',
+    sidebar: true,
+    title: "Page visibility",
+    description:
+      "Publish or hide a page for visitors. Hiding a page does not delete its content.",
+  },
+  {
+    target: '[data-tab="content"]',
+    sidebar: true,
+    title: "Page text",
+    description:
+      "Choose a page to edit its headings, descriptions, form labels, or legal copy. Save page text to apply the updates; Preview selected page opens the public page separately.",
+  },
+  {
+    target: '[data-tab="blocks"]',
+    sidebar: true,
+    title: "Content cards",
+    description:
+      "Add, edit, order, and publish cards and page sections. This includes partner names, session agendas, and short courses. Save card applies the changes.",
+  },
+  {
+    target: '[data-tab="navigation"]',
+    sidebar: true,
+    title: "Navigation links",
+    description:
+      "Manage links in the public header and footer. Site settings is a separate tab for the brand, contact details, social links, and footer information.",
+  },
+  {
+    target: '[data-tab="settings"]',
+    sidebar: true,
+    title: "Site settings",
+    description:
+      "Update shared website details such as branding, contact information, social profiles, and footer text, then save the settings.",
+  },
+  {
+    target: '[data-tab="events"]',
+    sidebar: true,
+    title: "Website content",
+    description:
+      "Team, Projects, Sessions, Events, and Gallery each have their own tab. Add or edit items, upload images, and publish them. Sessions can have registration redirects; events include flyers, dates, locations, and links.",
+  },
+  {
+    target: '[data-tab="registrations"]',
+    sidebar: true,
+    title: "Submissions and members",
+    description:
+      "Use Contact messages, Registrations, Applications, and Members to review incoming information. These inboxes contain private details; open a submission to review its full information.",
+  },
+  ...(currentRole === "super_admin"
+    ? [
+        {
+          target: '[data-tab="admins"]',
+          sidebar: true,
+          title: "Admin access",
+          description:
+            "Super admins can invite or remove website administrators here. Only grant access to people who should manage website data.",
+        },
+      ]
+    : []),
+  {
+    target: ".sidebar-site-link",
+    sidebar: true,
+    title: "Open the public website",
+    description:
+      "Open the visitor-facing website in a new tab to check how published changes look.",
+  },
+  {
+    target: "#signOutButton",
+    header: true,
+    title: "Sign out",
+    description:
+      "End your admin session when you are finished, especially on a shared device.",
+  },
+];
+let adminTourIndex = 0;
+let adminTourTarget = null;
+let adminTourReturnFocus = null;
+let adminTourAutoStarted = false;
+
+function hasSeenAdminTour() {
+  try {
+    return window.localStorage.getItem(adminTourStorageKey()) === "1";
+  } catch (error) {
+    console.error("Could not read admin dashboard tour preference:", error);
+    return false;
+  }
+}
+
+function clearAdminTourTarget() {
+  if (adminTourTarget) {
+    adminTourTarget.classList.remove("admin-tour-highlight");
+    adminTourTarget = null;
+  }
+  $("#dashboardSidebar").classList.remove("admin-tour-sidebar-target");
+  document.body.classList.remove("admin-tour-header-target");
+}
+
+function closeAdminTour(markSeen) {
+  clearAdminTourTarget();
+  adminTourScrim.hidden = true;
+  adminTourCard.hidden = true;
+  closeSidebar();
+  if (markSeen) {
+    try {
+      window.localStorage.setItem(adminTourStorageKey(), "1");
+    } catch (error) {
+      console.error("Could not save admin dashboard tour preference:", error);
+    }
+  }
+  if (adminTourReturnFocus?.isConnected) adminTourReturnFocus.focus();
+}
+
+function showAdminTourStep(index) {
+  const steps = adminTourSteps();
+  adminTourIndex = index;
+  const step = steps[adminTourIndex];
+  clearAdminTourTarget();
+  const sidebar = $("#dashboardSidebar");
+  if (step.sidebar && isMobileAdminDashboard()) {
+    sidebar.classList.add("open");
+    $("#sidebarBackdrop").hidden = false;
+    $("#sidebarToggle").setAttribute("aria-expanded", "true");
+  } else {
+    closeSidebar();
+  }
+  if (step.sidebar) sidebar.classList.add("admin-tour-sidebar-target");
+  if (step.header) document.body.classList.add("admin-tour-header-target");
+
+  const target = document.querySelector(step.target);
+  if (!target || target.hidden) {
+    console.error(`Admin dashboard tour target not found: ${step.target}`);
+    closeAdminTour(false);
+    return;
+  }
+  adminTourTarget = target;
+  target.classList.add("admin-tour-highlight");
+  target.scrollIntoView({ block: "center", inline: "nearest" });
+  adminTourStepsLabel.textContent = `Step ${adminTourIndex + 1} of ${steps.length}`;
+  adminTourTitle.textContent = step.title;
+  adminTourDescription.textContent = step.description;
+  adminTourBack.hidden = adminTourIndex === 0;
+  adminTourBack.disabled = adminTourIndex === 0;
+  adminTourNext.textContent =
+    adminTourIndex === steps.length - 1 ? "Finish tour" : "Next";
+  adminTourScrim.hidden = false;
+  adminTourCard.hidden = false;
+  adminTourNext.focus();
+}
+
+function startAdminTour() {
+  adminTourReturnFocus = document.activeElement;
+  showAdminTourStep(0);
+}
+
+$("#adminTourStart").addEventListener("click", startAdminTour);
+adminTourBack.addEventListener("click", () => {
+  if (adminTourIndex > 0) showAdminTourStep(adminTourIndex - 1);
+});
+adminTourSkip.addEventListener("click", () => closeAdminTour(true));
+adminTourNext.addEventListener("click", () => {
+  const steps = adminTourSteps();
+  if (adminTourIndex === steps.length - 1) {
+    closeAdminTour(true);
+  } else {
+    showAdminTourStep(adminTourIndex + 1);
+  }
+});
+adminTourCard.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeAdminTour(true);
+  } else if (event.key === "ArrowRight" && !adminTourNext.disabled) {
+    event.preventDefault();
+    adminTourNext.click();
+  } else if (event.key === "ArrowLeft" && !adminTourBack.disabled) {
+    event.preventDefault();
+    adminTourBack.click();
+  } else if (event.key === "Tab") {
+    const controls = $$(
+      "button:not([hidden]):not(:disabled)",
+      adminTourCard,
+    );
+    const firstControl = controls[0];
+    const lastControl = controls[controls.length - 1];
+    if (event.shiftKey && document.activeElement === firstControl) {
+      event.preventDefault();
+      lastControl.focus();
+    } else if (!event.shiftKey && document.activeElement === lastControl) {
+      event.preventDefault();
+      firstControl.focus();
+    }
+  }
 });
 
 async function openSection(section) {
