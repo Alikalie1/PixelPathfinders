@@ -98,6 +98,22 @@ create table if not exists public.sessions (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.events (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text not null default '',
+  event_date timestamptz not null,
+  venue text,
+  event_url text,
+  image_url text,
+  is_published boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists events_published_event_date_idx
+  on public.events (event_date)
+  where is_published;
+
 create table if not exists public.messages (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -272,6 +288,7 @@ alter table public.team_members enable row level security;
 alter table public.projects enable row level security;
 alter table public.gallery_items enable row level security;
 alter table public.sessions enable row level security;
+alter table public.events enable row level security;
 alter table public.messages enable row level security;
 alter table public.participants enable row level security;
 alter table public.volunteers enable row level security;
@@ -286,9 +303,9 @@ grant insert, update, delete on public.site_pages, public.site_content,
   public.site_settings, public.site_navigation_items, public.content_blocks
   to authenticated;
 grant select on public.team_members, public.projects, public.gallery_items,
-  public.sessions to anon, authenticated;
+  public.sessions, public.events to anon, authenticated;
 grant insert, update, delete on public.team_members, public.projects,
-  public.gallery_items, public.sessions to authenticated;
+  public.gallery_items, public.sessions, public.events to authenticated;
 grant insert on public.messages, public.participants, public.volunteers
   to anon, authenticated;
 grant select, delete on public.messages, public.participants, public.volunteers
@@ -425,6 +442,18 @@ create policy "published sessions are public" on public.sessions
   for select to anon, authenticated
   using (is_published or public.is_site_admin());
 create policy "admins manage sessions" on public.sessions
+  for all to authenticated
+  using (public.is_site_admin())
+  with check (public.is_site_admin());
+
+drop policy if exists "public read events" on public.events;
+drop policy if exists "admin write events" on public.events;
+drop policy if exists "published events are public" on public.events;
+drop policy if exists "admins manage events" on public.events;
+create policy "published events are public" on public.events
+  for select to anon, authenticated
+  using (is_published or public.is_site_admin());
+create policy "admins manage events" on public.events
   for all to authenticated
   using (public.is_site_admin())
   with check (public.is_site_admin());
@@ -825,10 +854,4 @@ begin
   on conflict (user_id) do update
   set role = 'super_admin';
 end;
-$bootstrap_super_admin$; hose that attend, attend there for the previous years, since when you attend there, they have 1 to 3 months, you need to be, to have some practical with the company because the institution is owned by the company. So you need to be doing the duty and other stuff with the company, but now nothing like that. So I just went on our own. So, even this, but this boy, I don't know if you know him, Barry.
-No, yeah, I know that.
-Yeah, he's a bro. Same village.
-Yeah, he told me.
-Okay.
-He told me.
-So even as like, vice minister, he said, I've been consulting about my, that I'm going to attend each other. He was advising me not to come because there is no proper lecture in there again. No more practical. I- I think the only people that are benefiting me in this institution is the ITs, the IT. I only focus on the IT and likewise this, free scholarship people. It's the ITs, the IT. I only focus on the IT, and I likewise this, free scholarship people from CDC, this place, Kuala. Is the, this school, this school here, call it school, but it's in December. They give some students scholarship to come and do their practical work. They are only focusing on them. Every day they are doing it because they are having fast money.
+$bootstrap_super_admin$; 

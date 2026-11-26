@@ -39,6 +39,7 @@ const sections = {
   team: ["Team", "Manage team members shown on the public website."],
   projects: ["Projects", "Manage project cards and project links."],
   sessions: ["Sessions", "Manage session details, images and redirects."],
+  events: ["Events", "Post events with flyers, countdowns, locations and links."],
   gallery: ["Gallery", "Manage public gallery photos and captions."],
   contact_messages: ["Contact messages", "Review and manage visitor messages."],
   registrations: ["Registrations", "Review and manage session registrations."],
@@ -51,6 +52,7 @@ const sectionPanels = {
   team: "records",
   projects: "records",
   sessions: "records",
+  events: "records",
   gallery: "records",
   contact_messages: "inbox",
   registrations: "inbox",
@@ -61,6 +63,7 @@ const recordSectionTables = {
   team: "team_members",
   projects: "projects",
   sessions: "sessions",
+  events: "events",
   gallery: "gallery_items",
 };
 const inboxSectionTables = {
@@ -103,6 +106,18 @@ const recordDefinitions = {
       ["link", "Session link", "url"],
       ["image_url", "Image URL", "url"],
       ["registration_redirect_url", "After-registration redirect URL", "text"],
+      ["is_published", "Published", "checkbox"],
+    ],
+  },
+  events: {
+    label: "Events",
+    fields: [
+      ["title", "Event title", "text", true],
+      ["description", "Description", "textarea", true],
+      ["event_date", "Date and time", "datetime-local", true],
+      ["venue", "Venue or location", "text"],
+      ["event_url", "Event link", "url"],
+      ["image_url", "Flyer image URL", "url"],
       ["is_published", "Published", "checkbox"],
     ],
   },
@@ -416,6 +431,7 @@ async function loadOverview() {
     ["Team members", "team_members"],
     ["Projects", "projects"],
     ["Sessions", "sessions"],
+    ["Events", "events"],
     ["Contact messages", "messages"],
     ["Session registrations", "participants"],
     ["Volunteer and partner forms", "volunteers"],
@@ -1076,13 +1092,15 @@ function buildRecordFields(table) {
           ? `<textarea name="${key}" rows="3"${required ? " required" : ""}></textarea>`
           : `<input name="${key}" type="${type}"${key === "registration_redirect_url" ? ' placeholder="/thank-you.html or https://example.com/thank-you"' : ""}${required ? " required" : ""}>`;
       const upload = ["photo_url", "image_url"].includes(key)
-        ? `<label class="upload-field wide">Upload image<input type="file" accept="image/*" data-image-upload-for="${key}"><small>Upload an image (up to 8 MB) to Supabase Storage. Saving the item publishes this image URL.</small></label>`
+        ? `<label class="upload-field wide">Upload ${table === "events" ? "flyer" : "image"}<input type="file" accept="image/*" data-image-upload-for="${key}"><small>Upload an image (up to 8 MB) to Supabase Storage. Saving the item publishes this image URL.</small></label>`
         : "";
       const help =
         key === "project_url"
           ? "<small>Optional link opened by the project card’s View project button.</small>"
           : key === "registration_redirect_url"
             ? "<small>Optional URL to open after someone successfully registers for this session.</small>"
+            : key === "event_url"
+              ? "<small>Optional public page or registration link for this event.</small>"
             : "";
       return `<label>${escapeHtml(label)}${control}${help}</label>${upload}`;
     })
@@ -1194,11 +1212,15 @@ $("#recordList").addEventListener("click", async (event) => {
       const field = form.elements.namedItem(key);
       if (!field) continue;
       if (type === "checkbox") field.checked = Boolean(record[key]);
-      else if (type === "datetime-local")
-        field.value = record[key]
-          ? new Date(record[key]).toISOString().slice(0, 16)
-          : "";
-      else field.value = record[key] ?? "";
+      else if (type === "datetime-local") {
+        const date = record[key] ? new Date(record[key]) : null;
+        if (date && Number.isFinite(date.getTime())) {
+          const localDate = new Date(
+            date.getTime() - date.getTimezoneOffset() * 60_000,
+          );
+          field.value = localDate.toISOString().slice(0, 16);
+        } else field.value = "";
+      } else field.value = record[key] ?? "";
     }
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   }

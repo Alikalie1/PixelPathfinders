@@ -189,24 +189,28 @@
                 <span class="nav-icon">10</span
                 ><span><strong>Sessions</strong><small>Details, images and redirects</small></span>
               </button>
-              <button class="tab" type="button" data-tab="gallery" title="Manage gallery items">
+              <button class="tab" type="button" data-tab="events" title="Post and manage events">
                 <span class="nav-icon">11</span
+                ><span><strong>Events</strong><small>Flyers, dates and locations</small></span>
+              </button>
+              <button class="tab" type="button" data-tab="gallery" title="Manage gallery items">
+                <span class="nav-icon">12</span
                 ><span><strong>Gallery</strong><small>Photos and captions</small></span>
               </button>
               <button class="tab" type="button" data-tab="contact_messages" title="Review contact messages">
-                <span class="nav-icon">12</span
+                <span class="nav-icon">13</span
                 ><span><strong>Contact messages</strong><small>Visitor messages</small></span>
               </button>
               <button class="tab" type="button" data-tab="registrations" title="Review session registrations">
-                <span class="nav-icon">13</span
+                <span class="nav-icon">14</span
                 ><span><strong>Registrations</strong><small>Session sign-ups</small></span>
               </button>
               <button class="tab" type="button" data-tab="applications" title="Review volunteer and partner applications">
-                <span class="nav-icon">14</span
+                <span class="nav-icon">15</span
                 ><span><strong>Applications</strong><small>Volunteers and partners</small></span>
               </button>
               <button class="tab" type="button" data-tab="members" title="Review member accounts">
-                <span class="nav-icon">15</span
+                <span class="nav-icon">16</span
                 ><span><strong>Members</strong><small>Member accounts</small></span>
               </button>
               <button
@@ -217,7 +221,7 @@
                 hidden
                 title="Invite or remove website administrators"
               >
-                <span class="nav-icon">16</span
+                <span class="nav-icon">17</span
                 ><span
                   ><strong>Admin access</strong
                   ><small>Manage administrators</small></span
@@ -581,9 +585,10 @@
                   <h2>Website data</h2>
                   <p class="section-help">
                     Add or edit the dynamic content shown on team, projects,
-                    sessions and gallery pages. Sessions support an image and
+                    sessions, events and gallery pages. Sessions support an image and
                     an optional post-registration redirect; projects can link
-                    to an external project page.
+                    to an external project page. Events support flyer uploads,
+                    descriptions, dates, locations and public links.
                   </p>
                 </div>
                 <label class="compact-field"
@@ -591,6 +596,7 @@
                     <option value="team_members">Team members</option>
                     <option value="projects">Projects</option>
                     <option value="sessions">Sessions</option>
+                    <option value="events">Events</option>
                     <option value="gallery_items">Gallery items</option>
                   </select></label
                 >
@@ -669,6 +675,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/config.js"></script>
-    <script src="/admin/admin.js?v=20261125-3"></script>
+    <script src="/admin/admin.js?v=20261126-1"></script>
   </body>
 </html>

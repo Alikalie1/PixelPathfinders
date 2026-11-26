@@ -510,11 +510,81 @@ async function upcoming(id, n) {
       ? data
           .map(
             (s) =>
-              `<div class="card rv">${s.image_url ? `<img src="${esc(s.image_url)}" alt="${esc(s.title)}" loading="lazy">` : ""}<span class="tag">${esc(s.platform || "Online")}</span><h3>${esc(s.title)}</h3><p>${new Date(s.session_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" })}</p><p>${esc(s.topic)}</p><a class="btn sm" href="join-session.html?session=${encodeURIComponent(s.id)}">Register</a></div>`,
+              `<div class="card rv">${s.image_url ? `<img src="${esc(s.image_url)}" alt="${esc(s.title)}" loading="lazy">` : ""}<span class="tag">${esc(s.platform || "Online")}</span><h3>${esc(s.title)}</h3><p>${new Date(s.session_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" })}</p><p class="session-countdown" data-countdown-date="${esc(s.session_date)}"></p><p>${esc(s.topic)}</p><a class="btn sm" href="join-session.html?session=${encodeURIComponent(s.id)}">Register</a></div>`,
           )
           .join("")
       : '<p class="mut">New sessions will be announced soon.</p>';
+  startCountdowns(el);
   watch();
+}
+async function upcomingEvents(id, n) {
+  const el = $("#" + id);
+  if (!db) {
+    el.innerHTML =
+      '<p class="mut">Events will appear here once Supabase is connected.</p>';
+    return;
+  }
+  const { data, error } = await db
+    .from("events")
+    .select("id, title, description, event_date, venue, event_url, image_url")
+    .gte("event_date", new Date().toISOString())
+    .eq("is_published", true)
+    .order("event_date", { ascending: true })
+    .limit(n);
+  if (error) {
+    console.error("Could not load upcoming events:", error);
+    el.innerHTML =
+      '<p class="mut">Unable to load upcoming events. Please try again later.</p>';
+    return;
+  }
+  el.innerHTML =
+    data && data.length
+      ? data
+          .map((event) => {
+            const eventUrl = safeHref(event.event_url);
+            const eventLink =
+              event.event_url && eventUrl !== "#"
+                ? `<a class="btn sm" href="${esc(eventUrl)}" target="_blank" rel="noopener noreferrer">Event details</a>`
+                : "";
+            return `<article class="card rv event-card">${event.image_url ? `<img src="${esc(event.image_url)}" alt="${esc(event.title)} event flyer" loading="lazy">` : ""}<span class="tag">Event</span><h3>${esc(event.title)}</h3><p>${esc(new Date(event.event_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" }))}</p><p class="session-countdown" data-countdown-date="${esc(event.event_date)}" data-countdown-label="Event"></p>${event.venue ? `<p class="event-location"><strong>Venue / location:</strong> ${esc(event.venue)}</p>` : ""}${event.description ? `<p>${esc(event.description)}</p>` : ""}${eventLink}</article>`;
+          })
+          .join("")
+      : '<p class="mut">New events will be announced soon.</p>';
+  startCountdowns(el);
+  watch();
+}
+let countdownTimer;
+function formatCountdown(date, now = Date.now(), itemLabel = "Session") {
+  const startsAt = new Date(date).getTime();
+  if (!Number.isFinite(startsAt)) return `${itemLabel} time unavailable`;
+
+  const remaining = startsAt - now;
+  if (remaining <= 0)
+    return remaining > -60_000 ? "Starting now" : `${itemLabel} started`;
+
+  const totalMinutes = Math.ceil(remaining / 60_000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  const parts = [];
+  if (days) parts.push(`${days} day${days === 1 ? "" : "s"}`);
+  if (hours) parts.push(`${hours} hour${hours === 1 ? "" : "s"}`);
+  if (minutes) parts.push(`${minutes} minute${minutes === 1 ? "" : "s"}`);
+  return `Starts in ${parts.join(", ")}`;
+}
+function updateCountdowns(root = document) {
+  root.querySelectorAll("[data-countdown-date]").forEach((countdown) => {
+    countdown.textContent = formatCountdown(
+      countdown.dataset.countdownDate,
+      Date.now(),
+      countdown.dataset.countdownLabel || "Session",
+    );
+  });
+}
+function startCountdowns(root) {
+  updateCountdowns(root);
+  if (!countdownTimer && document.querySelector("[data-countdown-date]"))
+    countdownTimer = window.setInterval(updateCountdowns, 30_000);
 }
 function gallery() {
   const go = async (c) => {
@@ -1253,6 +1323,7 @@ function renderMemberSessions(sessions, registrations) {
               <span class="tag">${esc(session.platform || "Online")}</span>
               <h3>${esc(session.title)}</h3>
               <p class="member-session-date">${esc(new Date(session.session_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" }))}</p>
+              <p class="session-countdown" data-countdown-date="${esc(session.session_date)}"></p>
               ${session.topic ? `<p>${esc(session.topic)}</p>` : ""}
               <button class="btn sm" type="button" data-register-session="${esc(session.id)}" data-registration-redirect="${esc(safeRedirectUrl(session.registration_redirect_url))}" ${registered ? "disabled" : ""}>
                 ${registered ? "Already registered" : "Register for session"}
@@ -1264,6 +1335,8 @@ function renderMemberSessions(sessions, registrations) {
 
   $("#memberAvailableSessions").innerHTML = renderCards(sessions);
   $("#memberUpcomingSessions").innerHTML = renderCards(sessions.slice(0, 3));
+  startCountdowns($("#memberAvailableSessions"));
+  startCountdowns($("#memberUpcomingSessions"));
 }
 
 async function loadMemberDashboard(user) {
