@@ -318,27 +318,33 @@ async function loadSiteContent() {
 
 const menuButton = $("#mb");
 const navigation = $("#nv");
-const closeMenu = () => {
-  navigation.classList.remove("open");
-  menuButton.setAttribute("aria-expanded", "false");
-  menuButton.setAttribute("aria-label", "Open menu");
-};
-menuButton.onclick = () => {
-  const isOpen = navigation.classList.toggle("open");
-  menuButton.setAttribute("aria-expanded", String(isOpen));
-  menuButton.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
-};
+if (menuButton && navigation) {
+  const closeMenu = () => {
+    navigation.classList.remove("open");
+    menuButton.setAttribute("aria-expanded", "false");
+    menuButton.setAttribute("aria-label", "Open menu");
+  };
+  menuButton.onclick = () => {
+    const isOpen = navigation.classList.toggle("open");
+    menuButton.setAttribute("aria-expanded", String(isOpen));
+    menuButton.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+  };
 
-navigation.querySelectorAll("a").forEach((link) => {
-  link.addEventListener("click", closeMenu);
-});
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeMenu();
-});
-addEventListener("scroll", () => {
-  $("#bar").style.width =
-    (scrollY / (document.body.scrollHeight - innerHeight)) * 100 + "%";
-});
+  navigation.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", closeMenu);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeMenu();
+  });
+}
+const progressBar = $("#bar");
+if (progressBar) {
+  addEventListener("scroll", () => {
+    const scrollableHeight = document.body.scrollHeight - innerHeight;
+    progressBar.style.width =
+      (scrollableHeight > 0 ? (scrollY / scrollableHeight) * 100 : 0) + "%";
+  });
+}
 const io = new IntersectionObserver(
   (e) =>
     e.forEach((x) => {
@@ -655,6 +661,233 @@ function auth() {
       if (event.key === "Escape") closeSidebar();
     });
 
+    const tourScrim = $("#memberTourScrim");
+    const tourCard = $("#memberTourCard");
+    const tourStepLabel = $("#memberTourStep");
+    const tourTitle = $("#memberTourTitle");
+    const tourDescription = $("#memberTourDescription");
+    const tourBack = $("#memberTourBack");
+    const tourSkip = $("#memberTourSkip");
+    const tourNext = $("#memberTourNext");
+    const tourStorageKey = () =>
+      `pixelpathfinders:member-dashboard-tour:v1:${currentMember.id}`;
+    const isMobileDashboard = window.matchMedia("(max-width: 800px)").matches;
+    const tourSteps = [
+      {
+        target: "#memberTourStart",
+        view: "overview",
+        title: "Dashboard tour",
+        description:
+          "You can reopen this walkthrough any time with this button. Use Next and Back to move through it, or Skip tour to close it.",
+      },
+      {
+        target: '[data-member-view="overview"]',
+        view: "overview",
+        sidebar: true,
+        title: "Overview",
+        description:
+          "Return here for your member number, registration and application counts, profile summary, and upcoming sessions.",
+      },
+      ...(isMobileDashboard
+        ? [
+            {
+              target: "#memberSidebarToggle",
+              view: "overview",
+              title: "Menu",
+              description:
+                "Open or close the dashboard navigation. You can also close it by tapping outside the menu or pressing Escape.",
+            },
+          ]
+        : []),
+      {
+        target: ".member-sidebar-brand",
+        view: "overview",
+        sidebar: true,
+        title: "Pixel Pathfinders logo",
+        description:
+          "Select the logo or organization name to return to the public website home page.",
+      },
+      {
+        target: '[data-open-member-view="profile"]',
+        view: "overview",
+        title: "Edit profile",
+        description:
+          "This shortcut opens My profile so you can update your name, phone number, and preferred session format.",
+      },
+      {
+        target: '[data-open-member-view="sessions"]',
+        view: "overview",
+        title: "Browse sessions",
+        description:
+          "Use this shortcut to see all available sessions and register with the contact and learning preferences shown there.",
+      },
+      {
+        target: '[data-member-view="sessions"]',
+        view: "sessions",
+        sidebar: true,
+        title: "Available sessions",
+        description:
+          "This section lists upcoming sessions. Enter your contact phone, choose how you will join and your level, then accept the consent checkbox before registering.",
+      },
+      {
+        target: "#memberAvailableSessions",
+        view: "sessions",
+        title: "Register for a session",
+        description:
+          "Choose Register for session on a session card to send your registration. The button changes to Already registered after a successful registration. If no sessions are listed, check back later.",
+      },
+      {
+        target: '[data-member-view="volunteer"]',
+        view: "volunteer",
+        sidebar: true,
+        title: "Volunteer",
+        description:
+          "Open this section to apply to volunteer. Complete the required course and contact details, choose at least one area where you can help, and give consent.",
+      },
+      {
+        target: "#memberVolunteerSubmit",
+        view: "volunteer",
+        title: "Send volunteer application",
+        description:
+          "This submits your completed volunteer application. You can check whether it was received under My activity.",
+      },
+      {
+        target: '[data-member-view="activity"]',
+        view: "activity",
+        sidebar: true,
+        title: "My activity",
+        description:
+          "Review your recent session registrations and volunteer or partner applications here. This section is for checking activity, not editing submissions.",
+      },
+      {
+        target: '[data-member-view="profile"]',
+        view: "profile",
+        sidebar: true,
+        title: "My profile",
+        description:
+          "Open your account details. Your email is read-only; you can update your name, phone number, and preferred session format.",
+      },
+      {
+        target: "#memberProfileSubmit",
+        view: "profile",
+        title: "Save my profile",
+        description:
+          "Save changes to your member profile. The dashboard will show a confirmation or an error after the save attempt.",
+      },
+      {
+        target: "#lo",
+        view: "overview",
+        sidebar: true,
+        title: "Log out",
+        description:
+          "End your member session and return to the login page. Use this on a shared device to protect your account.",
+      },
+    ];
+    let activeTourTarget = null;
+    let tourIndex = 0;
+    let tourReturnFocus = null;
+
+    const clearTourTarget = () => {
+      if (activeTourTarget) {
+        activeTourTarget.classList.remove("member-tour-highlight");
+        activeTourTarget = null;
+      }
+      dashboard.classList.remove("member-tour-sidebar-target");
+    };
+    const closeDashboardTour = (markSeen) => {
+      clearTourTarget();
+      tourScrim.hidden = true;
+      tourCard.hidden = true;
+      closeSidebar();
+      if (markSeen) {
+        try {
+          window.localStorage.setItem(tourStorageKey(), "1");
+        } catch (error) {
+          console.error("Could not save dashboard tour preference:", error);
+        }
+      }
+      if (tourReturnFocus?.isConnected) tourReturnFocus.focus();
+    };
+    const showTourStep = (index) => {
+      tourIndex = index;
+      const step = tourSteps[tourIndex];
+      setMemberView(step.view);
+      if (step.sidebar && isMobileDashboard) {
+        dashboard.classList.add("sidebar-open", "member-tour-sidebar-target");
+        backdrop.hidden = false;
+        sidebarToggle.setAttribute("aria-expanded", "true");
+      } else {
+        closeSidebar();
+      }
+      clearTourTarget();
+      if (step.sidebar && isMobileDashboard)
+        dashboard.classList.add("member-tour-sidebar-target");
+
+      const target =
+        step.target === "#memberAvailableSessions"
+          ? $("#memberAvailableSessions [data-register-session]") ||
+            $("#memberAvailableSessions")
+          : document.querySelector(step.target);
+      if (!target) {
+        console.error(`Dashboard tour target not found: ${step.target}`);
+        closeDashboardTour(false);
+        return;
+      }
+      activeTourTarget = target;
+      target.classList.add("member-tour-highlight");
+      target.scrollIntoView({ block: "center", inline: "nearest" });
+      tourStepLabel.textContent = `Step ${tourIndex + 1} of ${tourSteps.length}`;
+      tourTitle.textContent = step.title;
+      tourDescription.textContent = step.description;
+      tourBack.disabled = tourIndex === 0;
+      tourBack.hidden = tourIndex === 0;
+      tourNext.textContent =
+        tourIndex === tourSteps.length - 1 ? "Finish tour" : "Next";
+      tourScrim.hidden = false;
+      tourCard.hidden = false;
+      tourNext.focus();
+    };
+    const startDashboardTour = () => {
+      tourReturnFocus = document.activeElement;
+      showTourStep(0);
+    };
+
+    $("#memberTourStart").addEventListener("click", startDashboardTour);
+    tourBack.addEventListener("click", () => {
+      if (tourIndex > 0) showTourStep(tourIndex - 1);
+    });
+    tourSkip.addEventListener("click", () => closeDashboardTour(true));
+    tourNext.addEventListener("click", () => {
+      if (tourIndex === tourSteps.length - 1) {
+        closeDashboardTour(true);
+      } else {
+        showTourStep(tourIndex + 1);
+      }
+    });
+    tourCard.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeDashboardTour(true);
+      } else if (event.key === "ArrowRight" && !tourNext.disabled) {
+        event.preventDefault();
+        tourNext.click();
+      } else if (event.key === "ArrowLeft" && !tourBack.disabled) {
+        event.preventDefault();
+        tourBack.click();
+      } else if (event.key === "Tab") {
+        const controls = $$("button:not([hidden]):not(:disabled)", tourCard);
+        const firstControl = controls[0];
+        const lastControl = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === firstControl) {
+          event.preventDefault();
+          lastControl.focus();
+        } else if (!event.shiftKey && document.activeElement === lastControl) {
+          event.preventDefault();
+          firstControl.focus();
+        }
+      }
+    });
+
     $("#memberProfileForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
@@ -825,6 +1058,14 @@ function auth() {
         await loadMemberDashboard(user);
         $("#memberDashboard").hidden = false;
         $("#memberGate").hidden = true;
+        let hasSeenTour = false;
+        try {
+          hasSeenTour =
+            window.localStorage.getItem(tourStorageKey()) === "1";
+        } catch (error) {
+          console.error("Could not read dashboard tour preference:", error);
+        }
+        if (!hasSeenTour) startDashboardTour();
       })
       .catch((error) => {
         console.error("Could not verify member session:", error);

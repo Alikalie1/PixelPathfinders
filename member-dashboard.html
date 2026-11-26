@@ -17,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20261125-4" />
+    <link rel="stylesheet" href="style.css?v=20261126-2" />
     <link rel="stylesheet" href="accessibility.css?v=20261124-2" />
     <script src="accessibility.js?v=20261124-2"></script>
   </head>
@@ -121,6 +121,15 @@
               <h1 id="memberWelcome">Welcome</h1>
               <p id="memberEmail" class="mut"></p>
             </div>
+            <button
+              id="memberTourStart"
+              class="btn sm ghost member-tour-start"
+              type="button"
+              aria-label="Open dashboard tour"
+            >
+              <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+              <span>Dashboard tour</span>
+            </button>
           </div>
           <section class="member-view" data-member-panel="overview">
             <h2>Overview</h2>
@@ -333,7 +342,7 @@
                   I consent to being contacted about my volunteer application.
                 </span>
               </label>
-              <button class="btn member-submit" type="submit">
+              <button id="memberVolunteerSubmit" class="btn member-submit" type="submit">
                 Send volunteer application
               </button>
               <p
@@ -398,7 +407,7 @@
                     <option value="Physical">In person</option>
                   </select></label
                 >
-                <button class="btn member-submit" type="submit">
+                <button id="memberProfileSubmit" class="btn member-submit" type="submit">
                   Save my profile
                 </button>
               </form>
@@ -411,11 +420,46 @@
             </section>
           </section>
         </div>
+        <div
+          id="memberTourScrim"
+          class="member-tour-scrim"
+          aria-hidden="true"
+          hidden
+        ></div>
+        <section
+          id="memberTourCard"
+          class="member-tour-card"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="memberTourTitle"
+          aria-describedby="memberTourDescription"
+          tabindex="-1"
+          hidden
+        >
+          <p
+            id="memberTourStep"
+            class="member-tour-step"
+            aria-live="polite"
+          ></p>
+          <h2 id="memberTourTitle">Your dashboard tour</h2>
+          <p id="memberTourDescription" aria-live="polite"></p>
+          <div class="member-tour-controls">
+            <button id="memberTourBack" class="btn sm ghost" type="button">
+              Back
+            </button>
+            <button id="memberTourSkip" class="btn sm ghost" type="button">
+              Skip tour
+            </button>
+            <button id="memberTourNext" class="btn sm" type="button">
+              Next
+            </button>
+          </div>
+        </section>
       </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="app.js?v=20261125-2"></script>
+    <script src="app.js?v=20261126-2"></script>
     <script>
       auth();
     </script>
