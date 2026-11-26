@@ -17,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20261124-5" />
+    <link rel="stylesheet" href="style.css?v=20261126-1" />
     <link rel="stylesheet" href="accessibility.css?v=20261124-2" />
     <script src="accessibility.js?v=20261124-2"></script>
   </head>
@@ -64,13 +64,19 @@
             <i class="fa-solid fa-hands-holding-circle" aria-hidden="true"></i>
             <h3>Volunteer</h3>
             <p>Volunteer after completing a Pixel Pathfinders course.</p>
-            <a class="btn sm" href="join.html?apply=volunteer#applications">Volunteer with us</a>
+            <a class="btn sm" href="volunteer.html">Volunteer with us</a>
           </article>
           <article class="card rv join-choice-card">
             <i class="fa-solid fa-handshake" aria-hidden="true"></i>
             <h3>Partner with us</h3>
             <p>Sponsorship, mentoring, equipment, venues and training.</p>
-            <a class="btn sm" href="join.html?apply=partner#applications">Become a partner</a>
+            <a class="btn sm" href="partner.html">Become a partner</a>
+          </article>
+          <article class="card rv join-choice-card">
+            <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+            <h3>Join a session</h3>
+            <p>Register for an upcoming free learning session.</p>
+            <a class="btn sm" href="join-session.html">Register for a session</a>
           </article>
         </div>
       </section>
@@ -84,8 +90,8 @@
               registrations.
             </p>
           </div>
-          <a class="btn sm member-apply-link" href="#applications"
-            >Explore sessions and applications</a
+          <a class="btn sm member-apply-link" href="join-session.html"
+            >Explore sessions</a
           >
         </div>
         <div id="memberAuthPanel" class="member-auth-card">
@@ -277,311 +283,6 @@
 
       </section>
 
-      <section class="wrap sec registration" id="applications">
-        <h2 data-cms-key="applications.heading">Register or apply</h2>
-        <p class="mut" data-cms-key="applications.intro">
-          Join a free learning session, apply to volunteer, or tell us how your
-          organisation can partner with Pixel Pathfinders.
-        </p>
-        <div
-          class="registration-tabs"
-          role="tablist"
-          aria-label="Application type"
-        >
-          <button
-            class="btn sm on"
-            type="button"
-            id="participantTab"
-            role="tab"
-            aria-selected="true"
-            aria-controls="participantForm"
-          >
-            <span data-cms-key="applications.participant_tab"
-              >Join a session</span
-            >
-          </button>
-          <button
-            class="btn sm"
-            type="button"
-            id="volunteerTab"
-            role="tab"
-            aria-selected="false"
-            aria-controls="volunteerForm"
-            tabindex="-1"
-          >
-            <span data-cms-key="applications.volunteer_tab"
-              >Volunteer or partner</span
-            >
-          </button>
-        </div>
-        <form
-          class="registration-form"
-          id="participantForm"
-          role="tabpanel"
-          aria-labelledby="participantTab"
-        >
-          <div class="fields">
-            <label class="field" for="p-name"
-              ><span data-cms-key="form.full_name">Full name</span
-              ><input id="p-name" name="full_name" autocomplete="name" required
-            /></label>
-            <label class="field" for="p-phone"
-              ><span data-cms-key="form.phone">Phone or WhatsApp</span
-              ><input
-                id="p-phone"
-                name="phone"
-                type="tel"
-                autocomplete="tel"
-                required
-            /></label>
-            <label class="field" for="p-email"
-              ><span data-cms-key="form.optional_email">Email (optional)</span
-              ><input
-                id="p-email"
-                name="email"
-                type="email"
-                autocomplete="email"
-            /></label>
-            <label class="field" for="p-age"
-              ><span data-cms-key="form.age_group">Age group</span
-              ><select id="p-age" name="age_group">
-                <option value="" data-cms-key="form.choose_one">
-                  Choose one
-                </option>
-                <option value="Under 18" data-cms-key="form.age_under_18">
-                  Under 18
-                </option>
-                <option value="18 to 25" data-cms-key="form.age_18_25">
-                  18 to 25
-                </option>
-                <option value="26 to 35" data-cms-key="form.age_26_35">
-                  26 to 35
-                </option>
-                <option value="36 and over" data-cms-key="form.age_36_plus">
-                  36 and over
-                </option>
-              </select></label
-            >
-            <label class="field" for="p-session"
-              ><span data-cms-key="form.session">Session</span
-              ><select id="p-session" name="session_id">
-                <option value="any" data-cms-key="form.any_session">
-                  Any upcoming session
-                </option>
-              </select></label
-            >
-            <label class="field" for="p-level"
-              ><span data-cms-key="form.level">Your level</span
-              ><select id="p-level" name="level">
-                <option value="Beginner" data-cms-key="form.level_beginner">
-                  Beginner
-                </option>
-                <option value="Some skills" data-cms-key="form.level_some">
-                  Some skills
-                </option>
-                <option value="Advanced" data-cms-key="form.level_advanced">
-                  Advanced
-                </option>
-              </select></label
-            >
-            <fieldset class="field field-full">
-              <legend data-cms-key="form.join_mode">How will you join?</legend>
-              <div class="opts">
-                <label class="opt"
-                  ><input type="radio" name="mode" value="Virtual" checked />
-                  <span data-cms-key="form.online">Online</span></label
-                >
-                <label class="opt"
-                  ><input type="radio" name="mode" value="In person" />
-                  <span data-cms-key="form.in_person">In person</span></label
-                >
-              </div>
-            </fieldset>
-            <label class="field field-full" for="p-goals"
-              ><span data-cms-key="form.learning_goals"
-                >What do you hope to learn? (optional)</span
-              ><textarea id="p-goals" name="goals"></textarea>
-            </label>
-            <div class="consent">
-              <label class="opt">
-                <input type="checkbox" name="consent" required />
-                <span>
-                  <span data-cms-key="form.participant_consent_prefix"
-                    >I agree to follow our</span
-                  >
-                  <a href="terms.html" data-cms-key="form.terms_link"
-                    >Terms and Conditions</a
-                  >
-                  <span data-cms-key="form.participant_consent_suffix"
-                    >and be contacted about sessions. If I am under 18, a parent
-                    or guardian knows I am registering.</span
-                  >
-                </span>
-              </label>
-            </div>
-            <div class="honeypot" aria-hidden="true">
-              <label
-                >Leave this empty<input
-                  name="website"
-                  tabindex="-1"
-                  autocomplete="off"
-              /></label>
-            </div>
-          </div>
-          <button
-            class="btn"
-            type="submit"
-            data-cms-key="form.submit_participant"
-          >
-            Send my registration
-          </button>
-          <p
-            class="status"
-            id="participantStatus"
-            role="status"
-            aria-live="polite"
-            hidden
-          ></p>
-        </form>
-
-        <form
-          class="registration-form"
-          id="volunteerForm"
-          role="tabpanel"
-          aria-labelledby="volunteerTab"
-          hidden
-        >
-          <div class="fields">
-            <fieldset class="field field-full">
-              <legend data-cms-key="form.applying_as">I am applying as</legend>
-              <div class="opts">
-                <label class="opt"
-                  ><input type="radio" name="role" value="volunteer" checked />
-                  <span data-cms-key="form.volunteer">A volunteer</span></label
-                >
-                <label class="opt"
-                  ><input type="radio" name="role" value="partner" />
-                  <span data-cms-key="form.partner">A partner</span></label
-                >
-              </div>
-            </fieldset>
-            <label class="field" for="v-name"
-              ><span data-cms-key="form.full_name">Full name</span
-              ><input id="v-name" name="full_name" autocomplete="name" required
-            /></label>
-            <label class="field only-partner" for="v-organisation" hidden
-              ><span data-cms-key="form.organisation">Organisation</span
-              ><input
-                id="v-organisation"
-                name="organisation"
-                autocomplete="organization"
-            /></label>
-            <label class="field" for="v-phone"
-              ><span data-cms-key="form.phone">Phone or WhatsApp</span
-              ><input
-                id="v-phone"
-                name="phone"
-                type="tel"
-                autocomplete="tel"
-                required
-            /></label>
-            <label class="field" for="v-email"
-              ><span data-cms-key="form.email">Email</span
-              ><input
-                id="v-email"
-                name="email"
-                type="email"
-                autocomplete="email"
-                required
-            /></label>
-            <label class="field only-volunteer" for="v-course"
-              ><span data-cms-key="form.course"
-                >Pixel Pathfinders course completed</span
-              ><input id="v-course" name="course_completed" required
-            /></label>
-            <label class="field only-volunteer" for="v-certificate"
-              ><span data-cms-key="form.certificate"
-                >Certificate number (optional)</span
-              ><input
-                id="v-certificate"
-                name="certificate_no"
-                placeholder="PP-CERT-0001"
-                data-cms-placeholder="form.certificate_placeholder"
-            /></label>
-            <fieldset class="field field-full only-volunteer">
-              <legend data-cms-key="form.volunteer_mode">
-                How will you volunteer?
-              </legend>
-              <div class="opts">
-                <label class="opt"
-                  ><input type="radio" name="mode" value="Physical" checked />
-                  <span data-cms-key="form.in_person">In person</span></label
-                >
-                <label class="opt"
-                  ><input type="radio" name="mode" value="Virtual" />
-                  <span data-cms-key="form.online">Online</span></label
-                >
-              </div>
-            </fieldset>
-            <fieldset class="field field-full">
-              <legend id="areas-legend">Where can you help?</legend>
-              <div class="opts" id="areaOpts"></div>
-            </fieldset>
-            <label class="field field-full only-volunteer" for="v-availability"
-              ><span data-cms-key="form.availability"
-                >When are you available?</span
-              ><input
-                id="v-availability"
-                name="availability"
-                placeholder="Days and hours"
-                data-cms-placeholder="form.availability_placeholder"
-            /></label>
-            <label class="field field-full" for="v-message"
-              ><span id="msg-label">Tell us a little about yourself</span
-              ><textarea id="v-message" name="message"></textarea>
-            </label>
-            <div class="consent">
-              <label class="opt">
-                <input type="checkbox" name="consent" required />
-                <span>
-                  <span data-cms-key="form.application_consent_prefix"
-                    >I agree to follow our</span
-                  >
-                  <a href="terms.html" data-cms-key="form.terms_link"
-                    >Terms and Conditions</a
-                  >
-                  <span data-cms-key="form.application_consent_suffix"
-                    >, protect confidential information, and be contacted about
-                    my application.</span
-                  >
-                </span>
-              </label>
-            </div>
-            <div class="honeypot" aria-hidden="true">
-              <label
-                >Leave this empty<input
-                  name="website"
-                  tabindex="-1"
-                  autocomplete="off"
-              /></label>
-            </div>
-          </div>
-          <button
-            class="btn"
-            type="submit"
-            data-cms-key="form.submit_application"
-          >
-            Send my application
-          </button>
-          <p
-            class="status"
-            id="volunteerStatus"
-            role="status"
-            aria-live="polite"
-            hidden
-          ></p>
-        </form>
-      </section>
     </main>
     <footer class="ft">
       <div class="wrap fg">
@@ -680,8 +381,19 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="app.js?v=20261125-2"></script>
+    <script src="app.js?v=20261126-1"></script>
     <script>
+      const joinParams = new URLSearchParams(location.search);
+      const requestedApplication = joinParams.get("apply");
+      if (requestedApplication === "volunteer") {
+        location.replace("volunteer.html");
+      } else if (requestedApplication === "partner") {
+        location.replace("partner.html");
+      } else if (joinParams.has("session")) {
+        location.replace(
+          `join-session.html?session=${encodeURIComponent(joinParams.get("session"))}`,
+        );
+      }
       auth();
       registrationForms();
     </script>

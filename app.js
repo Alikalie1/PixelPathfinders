@@ -116,7 +116,7 @@ function renderContentBlock(section, block) {
     return `<a class="agenda-download" href="${esc(downloadUrl)}" download="${esc(`${block.title || "agenda"}.pdf`)}"><strong>${esc(block.title)}</strong>${block.body ? `<span>${esc(block.body)}</span>` : ""}<span class="agenda-download-label">Download PDF</span></a>`;
   }
   if (section === "session_short_courses") {
-    return `<article class="card rv short-course-card"><h3>${esc(block.title)}</h3>${block.body ? `<p>${esc(block.body)}</p>` : ""}<a class="btn sm" href="join.html#applications">Register</a></article>`;
+    return `<article class="card rv short-course-card"><h3>${esc(block.title)}</h3>${block.body ? `<p>${esc(block.body)}</p>` : ""}<a class="btn sm" href="join-session.html">Register</a></article>`;
   }
   if (section === "gallery_filters") {
     return `<button class="btn sm" type="button" data-c="${esc(block.title)}">${esc(block.title)}</button>`;
@@ -504,7 +504,7 @@ async function upcoming(id, n) {
       ? data
           .map(
             (s) =>
-              `<div class="card rv">${s.image_url ? `<img src="${esc(s.image_url)}" alt="${esc(s.title)}" loading="lazy">` : ""}<span class="tag">${esc(s.platform || "Online")}</span><h3>${esc(s.title)}</h3><p>${new Date(s.session_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" })}</p><p>${esc(s.topic)}</p><a class="btn sm" href="join.html?session=${encodeURIComponent(s.id)}#applications">Register</a></div>`,
+              `<div class="card rv">${s.image_url ? `<img src="${esc(s.image_url)}" alt="${esc(s.title)}" loading="lazy">` : ""}<span class="tag">${esc(s.platform || "Online")}</span><h3>${esc(s.title)}</h3><p>${new Date(s.session_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" })}</p><p>${esc(s.topic)}</p><a class="btn sm" href="join-session.html?session=${encodeURIComponent(s.id)}">Register</a></div>`,
           )
           .join("")
       : '<p class="mut">New sessions will be announced soon.</p>';
@@ -1174,22 +1174,23 @@ const partnerAreas = [
 function registrationForms() {
   const participantForm = $("#participantForm");
   const volunteerForm = $("#volunteerForm");
-  if (!participantForm || !volunteerForm) return;
+  if (!participantForm && !volunteerForm) return;
 
   const participantTab = $("#participantTab");
   const volunteerTab = $("#volunteerTab");
   const participantStatus = $("#participantStatus");
-  const volunteerStatus = $("#volunteerStatus");
   const sessionSelect = $("#p-session");
   const sessionRedirectUrls = new Map();
   let selectedSession = new URLSearchParams(location.search).get("session");
-  document.addEventListener("site-cms-loaded", () => {
+  if (sessionSelect) document.addEventListener("site-cms-loaded", () => {
     const option = sessionSelect.querySelector('option[value="any"]');
     const label = cmsValues.get("form.any_session");
     if (option && label) option.textContent = label;
   });
 
   const selectTab = (type) => {
+    if (!participantTab || !volunteerTab || !participantForm || !volunteerForm)
+      return;
     const showParticipant = type === "participant";
     participantTab.setAttribute("aria-selected", String(showParticipant));
     volunteerTab.setAttribute("aria-selected", String(!showParticipant));
@@ -1200,9 +1201,11 @@ function registrationForms() {
   };
 
   const setRole = (role) => {
+    if (!volunteerForm) return;
     const isPartner = role === "partner";
     $$('input[name="role"]', volunteerForm).forEach((input) => {
-      input.checked = input.value === role;
+      if (input.type === "hidden") input.value = role;
+      else input.checked = input.value === role;
     });
     $$(".only-partner", volunteerForm).forEach((field) => {
       field.hidden = !isPartner;
@@ -1210,12 +1213,15 @@ function registrationForms() {
     $$(".only-volunteer", volunteerForm).forEach((field) => {
       field.hidden = isPartner;
     });
-    $("#v-course").required = !isPartner;
-    $("#areas-legend").textContent =
+    const courseField = $("#v-course");
+    if (courseField) courseField.required = !isPartner;
+    const areasLegend = $("#areas-legend");
+    if (areasLegend) areasLegend.textContent =
       cmsValues.get(
         isPartner ? "form.partner_areas" : "form.volunteer_areas",
       ) || (isPartner ? "How can you support us?" : "Where can you help?");
-    $("#msg-label").textContent =
+    const messageLabel = $("#msg-label");
+    if (messageLabel) messageLabel.textContent =
       cmsValues.get(
         isPartner ? "form.partner_message" : "form.volunteer_message",
       ) ||
@@ -1230,7 +1236,8 @@ function registrationForms() {
       : isPartner
         ? partnerAreas
         : volunteerAreas;
-    $("#areaOpts").innerHTML = areas
+    const areaOptions = $("#areaOpts");
+    if (areaOptions) areaOptions.innerHTML = areas
       .map(
         (area) =>
           `<label class="opt"><input type="checkbox" name="areas" value="${esc(area)}"> ${esc(area)}</label>`,
@@ -1238,40 +1245,50 @@ function registrationForms() {
       .join("");
   };
 
-  participantTab.addEventListener("click", () => selectTab("participant"));
-  volunteerTab.addEventListener("click", () => selectTab("volunteer"));
-  [participantTab, volunteerTab].forEach((tab, index, tabs) => {
-    tab.addEventListener("keydown", (event) => {
-      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-        const nextTab = tabs[1 - index];
-        nextTab.click();
-        nextTab.focus();
-      }
+  if (participantTab && volunteerTab) {
+    participantTab.addEventListener("click", () => selectTab("participant"));
+    volunteerTab.addEventListener("click", () => selectTab("volunteer"));
+    [participantTab, volunteerTab].forEach((tab, index, tabs) => {
+      tab.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          const nextTab = tabs[1 - index];
+          nextTab.click();
+          nextTab.focus();
+        }
+      });
     });
-  });
-  $$('input[name="role"]', volunteerForm).forEach((input) => {
-    input.addEventListener("change", () => setRole(input.value));
-  });
-  document.addEventListener("site-cms-loaded", () => {
-    const selectedRole = $('input[name="role"]:checked', volunteerForm)?.value;
-    if (selectedRole) setRole(selectedRole);
-  });
+  }
+  if (volunteerForm) {
+    $$('input[name="role"]', volunteerForm).forEach((input) => {
+      input.addEventListener("change", () => setRole(input.value));
+    });
+    document.addEventListener("site-cms-loaded", () => {
+      const selectedRole =
+        $('input[name="role"]:checked', volunteerForm)?.value ||
+        $('input[name="role"][type="hidden"]', volunteerForm)?.value;
+      if (selectedRole) setRole(selectedRole);
+    });
+  }
 
   const requestedApplication = new URLSearchParams(location.search).get(
     "apply",
   );
-  if (
-    requestedApplication === "partner" ||
-    requestedApplication === "volunteer"
-  ) {
-    selectTab("volunteer");
-    setRole(requestedApplication);
-  } else {
-    setRole("volunteer");
+  if (volunteerForm) {
+    const defaultRole =
+      $('input[name="role"][type="hidden"]', volunteerForm)?.value ||
+      "volunteer";
+    const role =
+      requestedApplication === "partner" ||
+      requestedApplication === "volunteer"
+        ? requestedApplication
+        : defaultRole;
+    if (participantForm && participantTab && volunteerTab)
+      selectTab("volunteer");
+    setRole(role);
   }
 
   const loadSessions = async () => {
-    if (!db) return;
+    if (!db || !participantForm || !sessionSelect) return;
     const { data, error } = await db
       .from("sessions")
       .select("id, title, session_date, registration_redirect_url")
@@ -1281,9 +1298,11 @@ function registrationForms() {
 
     if (error) {
       console.error("Could not load registration sessions:", error);
-      participantStatus.textContent =
-        "Upcoming sessions could not be loaded. You can still register for any upcoming session.";
-      participantStatus.hidden = false;
+      if (participantStatus) {
+        participantStatus.textContent =
+          "Upcoming sessions could not be loaded. You can still register for any upcoming session.";
+        participantStatus.hidden = false;
+      }
       return;
     }
 
@@ -1303,7 +1322,7 @@ function registrationForms() {
     if (selectedSession) sessionSelect.value = selectedSession;
   };
 
-  participantForm.addEventListener("submit", (event) => {
+  if (participantForm) participantForm.addEventListener("submit", (event) => {
     const values = new FormData(participantForm);
     submitRegistration(event, participantForm, "participants", {
       full_name: String(values.get("full_name") || "").trim(),
@@ -1319,7 +1338,7 @@ function registrationForms() {
     }, sessionRedirectUrls.get(String(values.get("session_id") || "")));
   });
 
-  volunteerForm.addEventListener("submit", (event) => {
+  if (volunteerForm) volunteerForm.addEventListener("submit", (event) => {
     const values = new FormData(volunteerForm);
     const isPartner = values.get("role") === "partner";
     submitRegistration(event, volunteerForm, "volunteers", {
@@ -1341,7 +1360,7 @@ function registrationForms() {
     });
   });
 
-  loadSessions();
+  if (participantForm) loadSessions();
 }
 
 async function submitRegistration(event, formElement, table, row, redirectUrl) {

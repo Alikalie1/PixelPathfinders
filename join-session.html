@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Join a session | Pixel Pathfinders</title>
+    <meta
+      name="description"
+      content="Pixel Pathfinders: from idea to impact, pixel by pixel."
+    />
+    <link rel="icon" href="logo.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=20261126-1" />
+    <link rel="stylesheet" href="accessibility.css?v=20261124-2" />
+    <script src="accessibility.js?v=20261124-2"></script>
+  </head>
+  <body>
+    <div id="bar"></div>
+    <header class="hd">
+      <a class="brand" href="index.html"
+        ><img src="logo.png" alt="" width="36" height="36" /><span
+          data-site-setting="brand_name"
+          >Pixel Pathfinders</span
+        ></a
+      >
+      <button id="mb" aria-label="Menu" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <nav id="nv" data-nav-location="header">
+        <a href="index.html">Home</a><a href="about.html">About</a
+        ><a href="team.html">Team</a><a href="session.html">Sessions</a
+        ><a href="index.html#partners">Partners</a
+        ><a href="project.html">Projects</a><a href="gallery.html">Gallery</a
+        ><a href="contact.html">Contact</a
+        ><a class="btn sm" href="join.html">Join us</a>
+      </nav>
+    </header>
+        <main>
+      <section class="ph"><div class="wrap"><h1>Join a session</h1><p>Register for an upcoming Pixel Pathfinders learning session.</p></div></section>
+      <section class="wrap sec registration" id="applications">
+        <p><a class="btn sm" href="join.html">Back to membership</a></p>
+        <form
+          class="registration-form"
+          id="participantForm"
+        >
+          <div class="fields">
+            <label class="field" for="p-name"
+              ><span data-cms-key="form.full_name">Full name</span
+              ><input id="p-name" name="full_name" autocomplete="name" required
+            /></label>
+            <label class="field" for="p-phone"
+              ><span data-cms-key="form.phone">Phone or WhatsApp</span
+              ><input
+                id="p-phone"
+                name="phone"
+                type="tel"
+                autocomplete="tel"
+                required
+            /></label>
+            <label class="field" for="p-email"
+              ><span data-cms-key="form.optional_email">Email (optional)</span
+              ><input
+                id="p-email"
+                name="email"
+                type="email"
+                autocomplete="email"
+            /></label>
+            <label class="field" for="p-age"
+              ><span data-cms-key="form.age_group">Age group</span
+              ><select id="p-age" name="age_group">
+                <option value="" data-cms-key="form.choose_one">
+                  Choose one
+                </option>
+                <option value="Under 18" data-cms-key="form.age_under_18">
+                  Under 18
+                </option>
+                <option value="18 to 25" data-cms-key="form.age_18_25">
+                  18 to 25
+                </option>
+                <option value="26 to 35" data-cms-key="form.age_26_35">
+                  26 to 35
+                </option>
+                <option value="36 and over" data-cms-key="form.age_36_plus">
+                  36 and over
+                </option>
+              </select></label
+            >
+            <label class="field" for="p-session"
+              ><span data-cms-key="form.session">Session</span
+              ><select id="p-session" name="session_id">
+                <option value="any" data-cms-key="form.any_session">
+                  Any upcoming session
+                </option>
+              </select></label
+            >
+            <label class="field" for="p-level"
+              ><span data-cms-key="form.level">Your level</span
+              ><select id="p-level" name="level">
+                <option value="Beginner" data-cms-key="form.level_beginner">
+                  Beginner
+                </option>
+                <option value="Some skills" data-cms-key="form.level_some">
+                  Some skills
+                </option>
+                <option value="Advanced" data-cms-key="form.level_advanced">
+                  Advanced
+                </option>
+              </select></label
+            >
+            <fieldset class="field field-full">
+              <legend data-cms-key="form.join_mode">How will you join?</legend>
+              <div class="opts">
+                <label class="opt"
+                  ><input type="radio" name="mode" value="Virtual" checked />
+                  <span data-cms-key="form.online">Online</span></label
+                >
+                <label class="opt"
+                  ><input type="radio" name="mode" value="In person" />
+                  <span data-cms-key="form.in_person">In person</span></label
+                >
+              </div>
+            </fieldset>
+            <label class="field field-full" for="p-goals"
+              ><span data-cms-key="form.learning_goals"
+                >What do you hope to learn? (optional)</span
+              ><textarea id="p-goals" name="goals"></textarea>
+            </label>
+            <div class="consent">
+              <label class="opt">
+                <input type="checkbox" name="consent" required />
+                <span>
+                  <span data-cms-key="form.participant_consent_prefix"
+                    >I agree to follow our</span
+                  >
+                  <a href="terms.html" data-cms-key="form.terms_link"
+                    >Terms and Conditions</a
+                  >
+                  <span data-cms-key="form.participant_consent_suffix"
+                    >and be contacted about sessions. If I am under 18, a parent
+                    or guardian knows I am registering.</span
+                  >
+                </span>
+              </label>
+            </div>
+            <div class="honeypot" aria-hidden="true">
+              <label
+                >Leave this empty<input
+                  name="website"
+                  tabindex="-1"
+                  autocomplete="off"
+              /></label>
+            </div>
+          </div>
+          <button
+            class="btn"
+            type="submit"
+            data-cms-key="form.submit_participant"
+          >
+            Send my registration
+          </button>
+          <p
+            class="status"
+            id="participantStatus"
+            role="status"
+            hidden
+            aria-live="polite"
+          ></p>
+        </form>
+      </section>
+    </main>
+    <footer class="ft">
+      <div class="wrap fg">
+        <div>
+          <a class="brand" href="index.html"
+            ><img src="logo.png" alt="" width="36" height="36" /><span
+              data-site-setting="brand_name"
+              >Pixel Pathfinders</span
+            ></a
+          >
+          <p data-site-setting="tagline">
+            From idea to impact, pixel by pixel.
+          </p>
+          <div class="soc">
+            <a
+              href="#"
+              aria-label="Facebook"
+              data-site-setting="facebook_url"
+              data-site-href=""
+              ><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="Instagram"
+              data-site-setting="instagram_url"
+              data-site-href=""
+              ><i class="fa-brands fa-instagram" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="X"
+              data-site-setting="x_url"
+              data-site-href=""
+              ><i class="fa-brands fa-x-twitter" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="LinkedIn"
+              data-site-setting="linkedin_url"
+              data-site-href=""
+              ><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="YouTube"
+              data-site-setting="youtube_url"
+              data-site-href=""
+              ><i class="fa-brands fa-youtube" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="TikTok"
+              data-site-setting="tiktok_url"
+              data-site-href=""
+              ><i class="fa-brands fa-tiktok" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="WhatsApp"
+              data-site-setting="whatsapp_url"
+              data-site-href=""
+              ><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="Telegram"
+              data-site-setting="telegram_url"
+              data-site-href=""
+              ><i class="fa-brands fa-telegram" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="GitHub"
+              data-site-setting="github_url"
+              data-site-href=""
+              ><i class="fa-brands fa-github" aria-hidden="true"></i></a
+            ><a
+              href="#"
+              aria-label="Email"
+              data-site-setting="contact_email"
+              data-site-href="mailto:"
+              ><i class="fa-solid fa-envelope" aria-hidden="true"></i
+            ></a>
+          </div>
+        </div>
+        <div>
+          <h4 data-site-setting="footer_explore_label">Explore</h4>
+          <a href="index.html">Home</a><a href="about.html">About</a
+          ><a href="team.html">Team</a><a href="session.html">Sessions</a
+          ><a href="index.html#partners">Partners</a
+          ><a href="project.html">Projects</a><a href="gallery.html">Gallery</a
+          ><a href="contact.html">Contact</a>
+        </div>
+        <div>
+          <h4 data-site-setting="footer_legal_label">Legal</h4>
+          <a href="privacy.html">Privacy Policy</a
+          ><a href="terms.html">Terms and Conditions</a
+          ><a href="join.html">Become a member</a>
+        </div>
+      </div>
+      <p class="cp" data-site-setting="copyright_text">
+        &copy; 2026 Pixel Pathfinders. Founded 9 September 2026.
+      </p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js?v=20261126-1"></script>
+    <script>
+      registrationForms();
+    </script>
+  </body>
+</html>
