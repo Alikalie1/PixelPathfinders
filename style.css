@@ -1060,6 +1060,13 @@ textarea:focus {
 .member-session-card p {
   margin: 0;
 }
+.member-session-card .member-event-image {
+  width: 100%;
+  max-height: 220px;
+  aspect-ratio: 16 / 9;
+  border-radius: 9px;
+  object-fit: cover;
+}
 .member-session-card h3 {
   font-size: 17px;
 }
@@ -1093,6 +1100,16 @@ textarea:focus {
 }
 .member-session-card .btn {
   margin-top: auto;
+}
+.member-event-actions {
+  width: 100%;
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.member-event-actions .btn {
+  margin-top: 0;
 }
 .member-session-card .btn:disabled {
   opacity: 0.65;
@@ -1224,9 +1241,38 @@ textarea:focus {
 }
 .member-summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
   margin: 20px 0;
+}
+.member-event-notification {
+  margin-bottom: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #b8d5ff;
+  border-left: 5px solid var(--b);
+  border-radius: 12px;
+  background: #eef5ff;
+}
+.member-event-notification h3,
+.member-event-notification p:last-child {
+  margin-bottom: 0;
+}
+.member-count-badge {
+  min-width: 22px;
+  height: 22px;
+  margin-left: auto;
+  padding: 0 6px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #fff;
+  background: #b42318;
+  font-size: 12px;
+  font-weight: 700;
 }
 .member-summary-card {
   padding: 16px;
@@ -1599,6 +1645,10 @@ textarea:focus {
   }
   .member-summary {
     grid-template-columns: 1fr;
+  }
+  .member-event-notification {
+    align-items: flex-start;
+    flex-direction: column;
   }
   .member-dashboard {
     padding: 17px;

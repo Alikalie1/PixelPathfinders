@@ -62,7 +62,12 @@ function renderNavigation(locationName, items) {
   }
   const currentPage =
     location.pathname.split("/").filter(Boolean).pop() || "index.html";
-  const links = items.map((item) => {
+  const navigationItems =
+    locationName === "legal" &&
+    !items.some((item) => item.href === "cookies.html")
+      ? [...items, { label: "Cookie Policy", href: "cookies.html" }]
+      : items;
+  const links = navigationItems.map((item) => {
     const link = document.createElement("a");
     const href = safeHref(item.href);
     const [targetPage, targetHash] = href.split("#");
@@ -800,6 +805,21 @@ function auth() {
           "This section lists upcoming sessions. Enter your contact phone, choose how you will join and your level, then accept the consent checkbox before registering.",
       },
       {
+        target: '[data-member-view="events"]',
+        view: "events",
+        sidebar: true,
+        title: "Upcoming events",
+        description:
+          "See event announcements from the team. Open an event and choose RSVP to reserve a place; your sign-up will appear under My activity.",
+      },
+      {
+        target: "#memberAvailableEvents [data-register-event]",
+        view: "events",
+        title: "RSVP to an event",
+        description:
+          "Use RSVP on an event card to register with your member account. The button changes after a successful sign-up, and event flyers, dates, locations, and links appear on each card.",
+      },
+      {
         target: "#memberAvailableSessions",
         view: "sessions",
         title: "Register for a session",
@@ -869,7 +889,10 @@ function auth() {
       tourScrim.hidden = true;
       tourCard.hidden = true;
       closeSidebar();
-      if (markSeen) {
+      if (
+        markSeen &&
+        window.SiteCookieConsent?.allowsFunctionalPreferences()
+      ) {
         try {
           window.localStorage.setItem(tourStorageKey(), "1");
         } catch (error) {
@@ -897,6 +920,9 @@ function auth() {
         step.target === "#memberAvailableSessions"
           ? $("#memberAvailableSessions [data-register-session]") ||
             $("#memberAvailableSessions")
+          : step.target === "#memberAvailableEvents [data-register-event]"
+            ? $("#memberAvailableEvents [data-register-event]") ||
+              $("#memberAvailableEvents")
           : document.querySelector(step.target);
       if (!target) {
         console.error(`Dashboard tour target not found: ${step.target}`);
@@ -1043,6 +1069,44 @@ function auth() {
       }
     });
 
+    $("#memberAvailableEvents").addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-register-event]");
+      if (!button) return;
+
+      const status = $("#memberEventStatus");
+      const eventTitle = button.dataset.eventTitle;
+      const originalLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = "Sending RSVP…";
+      status.textContent = "";
+      try {
+        const { error } = await db.from("event_registrations").insert({
+          event_id: button.dataset.registerEvent,
+          event_title: eventTitle,
+          user_id: currentMember.id,
+          full_name: currentMemberProfile.full_name || currentMember.email,
+          email: currentMember.email,
+        });
+        if (error && error.code !== "23505") throw error;
+        await loadMemberDashboard(currentMember);
+        status.textContent =
+          error?.code === "23505"
+            ? `You are already registered for ${eventTitle}.`
+            : `Your RSVP for ${eventTitle} was received.`;
+        status.className = "member-activity-status ok";
+      } catch (error) {
+        console.error("Could not register member for event:", error);
+        status.textContent =
+          error.message || "Could not RSVP for this event. Please try again.";
+        status.className = "member-activity-status err";
+      } finally {
+        if (button.isConnected) {
+          button.disabled = false;
+          button.textContent = originalLabel;
+        }
+      }
+    });
+
     $("#memberVolunteerForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
@@ -1129,11 +1193,13 @@ function auth() {
         $("#memberDashboard").hidden = false;
         $("#memberGate").hidden = true;
         let hasSeenTour = false;
-        try {
-          hasSeenTour =
-            window.localStorage.getItem(tourStorageKey()) === "1";
-        } catch (error) {
-          console.error("Could not read dashboard tour preference:", error);
+        if (window.SiteCookieConsent?.allowsFunctionalPreferences()) {
+          try {
+            hasSeenTour =
+              window.localStorage.getItem(tourStorageKey()) === "1";
+          } catch (error) {
+            console.error("Could not read dashboard tour preference:", error);
+          }
         }
         if (!hasSeenTour) startDashboardTour();
       })
@@ -1339,6 +1405,62 @@ function renderMemberSessions(sessions, registrations) {
   startCountdowns($("#memberUpcomingSessions"));
 }
 
+function renderMemberEvents(events, registrations, registrationAvailable) {
+  const registeredIds = new Set(
+    registrations.map((registration) => registration.event_id),
+  );
+  const unregisteredEvents = events.filter(
+    (event) => !registeredIds.has(event.id),
+  );
+  const badge = $("#memberEventBadge");
+  badge.textContent = String(unregisteredEvents.length);
+  badge.hidden = unregisteredEvents.length === 0;
+
+  const notification = $("#memberEventNotification");
+  notification.hidden = unregisteredEvents.length === 0;
+  if (unregisteredEvents.length) {
+    const firstEvent = unregisteredEvents[0];
+    $("#memberEventNotificationTitle").textContent =
+      unregisteredEvents.length === 1
+        ? "A new event is open for RSVP"
+        : `${unregisteredEvents.length} events are open for RSVP`;
+    $("#memberEventNotificationText").textContent =
+      `${firstEvent.title} · ${new Date(firstEvent.event_date).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}`;
+  }
+
+  $("#memberAvailableEvents").innerHTML = events.length
+    ? events
+        .map((event) => {
+          const registered = registeredIds.has(event.id);
+          const eventUrl = safeHref(event.event_url);
+          const eventLink =
+            event.event_url && eventUrl !== "#"
+              ? `<a class="btn sm ghost" href="${esc(eventUrl)}" target="_blank" rel="noopener noreferrer">Event details</a>`
+              : "";
+          const actionLabel = registered
+            ? "RSVP received"
+            : registrationAvailable
+              ? "RSVP to this event"
+              : "RSVP unavailable";
+          return `<article class="member-session-card member-event-card">
+            ${event.image_url ? `<img class="member-event-image" src="${esc(event.image_url)}" alt="${esc(event.title)} event flyer" loading="lazy">` : ""}
+            <span class="tag">Event</span>
+            <h3>${esc(event.title)}</h3>
+            <p class="member-session-date">${esc(new Date(event.event_date).toLocaleString([], { dateStyle: "full", timeStyle: "short" }))}</p>
+            <p class="session-countdown" data-countdown-date="${esc(event.event_date)}" data-countdown-label="Event"></p>
+            ${event.venue ? `<p><strong>Venue / location:</strong> ${esc(event.venue)}</p>` : ""}
+            ${event.description ? `<p>${esc(event.description)}</p>` : ""}
+            <div class="member-event-actions">
+              <button class="btn sm" type="button" data-register-event="${esc(event.id)}" data-event-title="${esc(event.title)}" ${registered || !registrationAvailable ? "disabled" : ""}>${actionLabel}</button>
+              ${eventLink}
+            </div>
+          </article>`;
+        })
+        .join("")
+    : '<p class="member-empty">No upcoming events are available right now.</p>';
+  startCountdowns($("#memberAvailableEvents"));
+}
+
 async function loadMemberDashboard(user) {
   const [
     profileResult,
@@ -1346,6 +1468,8 @@ async function loadMemberDashboard(user) {
     applicationsResult,
     sessionsResult,
     registeredSessionsResult,
+    eventsResult,
+    eventRegistrationsResult,
   ] = await Promise.all([
     db
       .from("profiles")
@@ -1374,6 +1498,18 @@ async function loadMemberDashboard(user) {
       .from("participants")
       .select("session_id")
       .eq("user_id", user.id),
+    db
+      .from("events")
+      .select("id, title, description, event_date, venue, event_url, image_url")
+      .gte("event_date", new Date().toISOString())
+      .eq("is_published", true)
+      .order("event_date", { ascending: true })
+      .limit(50),
+    db
+      .from("event_registrations")
+      .select("id, event_id, event_title, created_at", { count: "exact" })
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
   ]);
 
   const profileStatus = $("#memberProfileStatus");
@@ -1403,6 +1539,32 @@ async function loadMemberDashboard(user) {
     renderMemberSessions(
       sessionsResult.data || [],
       registeredSessionsResult.data || [],
+    );
+  }
+
+  const eventStatus = $("#memberEventStatus");
+  if (eventsResult.error) {
+    console.error("Could not load member events:", eventsResult.error);
+    eventStatus.textContent =
+      "Upcoming events could not be loaded. Please try again later.";
+    eventStatus.className = "member-activity-status err";
+    renderMemberEvents([], [], false);
+  } else if (eventRegistrationsResult.error) {
+    console.error(
+      "Could not load member event registrations:",
+      eventRegistrationsResult.error,
+    );
+    eventStatus.textContent =
+      "Event RSVPs are not set up yet. Please contact the website administrator.";
+    eventStatus.className = "member-activity-status err";
+    renderMemberEvents(eventsResult.data || [], [], false);
+  } else {
+    eventStatus.textContent = "";
+    eventStatus.className = "member-activity-status";
+    renderMemberEvents(
+      eventsResult.data || [],
+      eventRegistrationsResult.data || [],
+      true,
     );
   }
 
@@ -1462,6 +1624,22 @@ async function loadMemberDashboard(user) {
           .join("")
       : '<p class="member-empty">Your volunteer and partner applications will appear here.</p>';
   }
+  $("#memberEventRegistrationCount").textContent =
+    eventRegistrationsResult.count ?? "—";
+  $("#memberEventRegistrations").innerHTML = eventRegistrationsResult.error
+    ? '<p class="member-empty">Event RSVP history is unavailable.</p>'
+    : eventRegistrationsResult.data.length
+      ? eventRegistrationsResult.data
+          .slice(0, 5)
+          .map(
+            (item) => `<article class="member-activity-item">
+              <strong>Event RSVP</strong>
+              <span>${esc(item.event_title)}</span>
+              <small>${esc(new Date(item.created_at).toLocaleDateString())}</small>
+            </article>`,
+          )
+          .join("")
+      : '<p class="member-empty">Your event RSVPs will appear here.</p>';
   const activityStatus = $("#memberActivityStatus");
   activityStatus.textContent = activityErrors.join(" ");
   activityStatus.className = activityErrors.length

@@ -17,8 +17,10 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20261126-3" />
-    <link rel="stylesheet" href="accessibility.css?v=20261124-2" />
+    <link rel="stylesheet" href="style.css?v=20261126-5" />
+    <link rel="stylesheet" href="accessibility.css?v=20261126-1" />
+    <script src="cookie-consent.js?v=20261126-1"></script>
+    <script src="site-feedback.js?v=20261126-1"></script>
     <script src="accessibility.js?v=20261124-2"></script>
   </head>
   <body class="member-dashboard-page">
@@ -67,6 +69,15 @@
             >
               <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
               Available sessions
+            </button>
+            <button
+              class="member-sidebar-link"
+              type="button"
+              data-member-view="events"
+            >
+              <i class="fa-solid fa-bell" aria-hidden="true"></i>
+              Events
+              <span id="memberEventBadge" class="member-count-badge" hidden></span>
             </button>
             <button
               class="member-sidebar-link"
@@ -146,7 +157,29 @@
                 <span>Applications sent</span>
                 <strong id="memberApplicationCount">0</strong>
               </article>
+              <article class="member-summary-card">
+                <span>Event RSVPs</span>
+                <strong id="memberEventRegistrationCount">0</strong>
+              </article>
             </div>
+            <section
+              id="memberEventNotification"
+              class="member-event-notification"
+              hidden
+            >
+              <div>
+                <p class="member-eyebrow">EVENT UPDATE</p>
+                <h3 id="memberEventNotificationTitle">Upcoming events</h3>
+                <p id="memberEventNotificationText"></p>
+              </div>
+              <button
+                class="btn sm"
+                type="button"
+                data-open-member-view="events"
+              >
+                View events
+              </button>
+            </section>
             <section class="member-dashboard-card member-profile-summary">
               <div>
                 <p class="member-eyebrow">YOUR DETAILS</p>
@@ -234,6 +267,23 @@
                 class="member-session-grid"
               ></div>
             </form>
+          </section>
+          <section class="member-view" data-member-panel="events" hidden>
+            <h2>Upcoming events</h2>
+            <p class="mut">
+              Review events posted by Pixel Pathfinders and RSVP from your
+              member account.
+            </p>
+            <p
+              id="memberEventStatus"
+              class="member-activity-status"
+              role="status"
+              aria-live="polite"
+            ></p>
+            <div
+              id="memberAvailableEvents"
+              class="member-session-grid"
+            ></div>
           </section>
           <section class="member-view" data-member-panel="volunteer" hidden>
             <h2>Apply to volunteer</h2>
@@ -373,6 +423,13 @@
                 <h3>Volunteer applications</h3>
                 <div id="memberApplications" class="member-activity-list"></div>
               </section>
+              <section class="member-dashboard-card">
+                <h3>Event RSVPs</h3>
+                <div
+                  id="memberEventRegistrations"
+                  class="member-activity-list"
+                ></div>
+              </section>
             </div>
           </section>
           <section class="member-view" data-member-panel="profile" hidden>
@@ -459,7 +516,7 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="app.js?v=20261126-4"></script>
+    <script src="app.js?v=20261126-5"></script>
     <script>
       auth();
     </script>

@@ -43,6 +43,7 @@ const sections = {
   gallery: ["Gallery", "Manage public gallery photos and captions."],
   contact_messages: ["Contact messages", "Review and manage visitor messages."],
   registrations: ["Registrations", "Review and manage session registrations."],
+  event_registrations: ["Event registrations", "Review member RSVPs for published events."],
   applications: ["Applications", "Review volunteer and partner applications."],
   members: ["Members", "Review and manage member accounts."],
   admins: ["Administrator access", "Invite and manage website administrators."],
@@ -56,6 +57,7 @@ const sectionPanels = {
   gallery: "records",
   contact_messages: "inbox",
   registrations: "inbox",
+  event_registrations: "inbox",
   applications: "inbox",
   members: "inbox",
 };
@@ -69,6 +71,7 @@ const recordSectionTables = {
 const inboxSectionTables = {
   contact_messages: "messages",
   registrations: "participants",
+  event_registrations: "event_registrations",
   applications: "volunteers",
   members: "profiles",
 };
@@ -333,7 +336,14 @@ const adminTourSteps = () => [
     sidebar: true,
     title: "Submissions and members",
     description:
-      "Use Contact messages, Registrations, Applications, and Members to review incoming information. These inboxes contain private details; open a submission to review its full information.",
+      "Use Contact messages, Registrations, Applications, and Members to review incoming information. Event RSVPs have their own tab. These inboxes contain private details; open a submission to review its full information.",
+  },
+  {
+    target: '[data-tab="event_registrations"]',
+    sidebar: true,
+    title: "Event RSVPs",
+    description:
+      "Review which signed-in members have reserved a place at each event. This private inbox includes the event title and the member’s submitted contact details.",
   },
   ...(currentRole === "super_admin"
     ? [
@@ -367,6 +377,7 @@ let adminTourReturnFocus = null;
 let adminTourAutoStarted = false;
 
 function hasSeenAdminTour() {
+  if (!window.SiteCookieConsent?.allowsFunctionalPreferences()) return false;
   try {
     return window.localStorage.getItem(adminTourStorageKey()) === "1";
   } catch (error) {
@@ -389,7 +400,10 @@ function closeAdminTour(markSeen) {
   adminTourScrim.hidden = true;
   adminTourCard.hidden = true;
   closeSidebar();
-  if (markSeen) {
+  if (
+    markSeen &&
+    window.SiteCookieConsent?.allowsFunctionalPreferences()
+  ) {
     try {
       window.localStorage.setItem(adminTourStorageKey(), "1");
     } catch (error) {
@@ -666,6 +680,7 @@ async function loadOverview() {
     ["Events", "events"],
     ["Contact messages", "messages"],
     ["Session registrations", "participants"],
+    ["Event registrations", "event_registrations"],
     ["Volunteer and partner forms", "volunteers"],
   ];
   const counts = await Promise.all(
@@ -1482,6 +1497,7 @@ $("#inboxType").addEventListener("change", loadInbox);
 const inboxTableLabels = {
   messages: "Contact message",
   participants: "Session registration",
+  event_registrations: "Event RSVP",
   volunteers: "Volunteer or partner application",
   profiles: "Member account",
 };
@@ -1490,6 +1506,7 @@ const inboxFieldLabels = {
   certificate_no: "Certificate number",
   course_completed: "Course completed",
   created_at: "Submitted",
+  event_title: "Event",
   full_name: "Full name",
   member_no: "Member number",
   organisation: "Organisation",
@@ -1546,7 +1563,11 @@ async function loadInbox() {
           record.email ||
           "Submission";
         const details = Object.entries(record)
-          .filter(([key]) => !["id", "user_id", "created_at"].includes(key))
+          .filter(
+            ([key]) =>
+              !["id", "user_id", "created_at"].includes(key) &&
+              !(table === "event_registrations" && key === "event_id"),
+          )
           .map(([key, value]) => {
             const label =
               inboxFieldLabels[key] ||

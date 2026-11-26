@@ -12,7 +12,9 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/admin/admin.css?v=20261126-5" />
-    <link rel="stylesheet" href="/accessibility.css?v=20261124-2" />
+    <link rel="stylesheet" href="/accessibility.css?v=20261126-1" />
+    <script src="/cookie-consent.js?v=20261126-1"></script>
+    <script src="/site-feedback.js?v=20261126-1"></script>
     <script src="/accessibility.js?v=20261124-2"></script>
   </head>
   <body>
@@ -205,12 +207,16 @@
                 <span class="nav-icon">14</span
                 ><span><strong>Registrations</strong><small>Session sign-ups</small></span>
               </button>
-              <button class="tab" type="button" data-tab="applications" title="Review volunteer and partner applications">
+              <button class="tab" type="button" data-tab="event_registrations" title="Review member event RSVPs">
                 <span class="nav-icon">15</span
+                ><span><strong>Event RSVPs</strong><small>Member event sign-ups</small></span>
+              </button>
+              <button class="tab" type="button" data-tab="applications" title="Review volunteer and partner applications">
+                <span class="nav-icon">16</span
                 ><span><strong>Applications</strong><small>Volunteers and partners</small></span>
               </button>
               <button class="tab" type="button" data-tab="members" title="Review member accounts">
-                <span class="nav-icon">16</span
+                <span class="nav-icon">17</span
                 ><span><strong>Members</strong><small>Member accounts</small></span>
               </button>
               <button
@@ -221,7 +227,7 @@
                 hidden
                 title="Invite or remove website administrators"
               >
-                <span class="nav-icon">17</span
+                <span class="nav-icon">18</span
                 ><span
                   ><strong>Admin access</strong
                   ><small>Manage administrators</small></span
@@ -646,6 +652,7 @@
                   >Choose an inbox<select id="inboxType">
                     <option value="messages">Contact messages</option>
                     <option value="participants">Session registrations</option>
+                    <option value="event_registrations">Event registrations</option>
                     <option value="volunteers">
                       Volunteer and partner applications
                     </option>
@@ -724,6 +731,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/config.js"></script>
-    <script src="/admin/admin.js?v=20261126-2"></script>
+    <script src="/admin/admin.js?v=20261126-3"></script>
   </body>
 </html>

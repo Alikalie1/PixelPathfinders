@@ -114,6 +114,17 @@ create index if not exists events_published_event_date_idx
   on public.events (event_date)
   where is_published;
 
+create table if not exists public.event_registrations (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events(id) on delete cascade,
+  event_title text not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  full_name text not null,
+  email text not null,
+  created_at timestamptz not null default now(),
+  unique (event_id, user_id)
+);
+
 create table if not exists public.messages (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -289,6 +300,7 @@ alter table public.projects enable row level security;
 alter table public.gallery_items enable row level security;
 alter table public.sessions enable row level security;
 alter table public.events enable row level security;
+alter table public.event_registrations enable row level security;
 alter table public.messages enable row level security;
 alter table public.participants enable row level security;
 alter table public.volunteers enable row level security;
@@ -306,6 +318,7 @@ grant select on public.team_members, public.projects, public.gallery_items,
   public.sessions, public.events to anon, authenticated;
 grant insert, update, delete on public.team_members, public.projects,
   public.gallery_items, public.sessions, public.events to authenticated;
+grant select, insert, delete on public.event_registrations to authenticated;
 grant insert on public.messages, public.participants, public.volunteers
   to anon, authenticated;
 grant select, delete on public.messages, public.participants, public.volunteers
@@ -458,6 +471,30 @@ create policy "admins manage events" on public.events
   using (public.is_site_admin())
   with check (public.is_site_admin());
 
+drop policy if exists "members register for events" on public.event_registrations;
+drop policy if exists "members and admins read event registrations" on public.event_registrations;
+drop policy if exists "admins delete event registrations" on public.event_registrations;
+create policy "members register for events" on public.event_registrations
+  for insert to authenticated with check (
+    user_id = auth.uid()
+    and length(trim(full_name)) > 0
+    and length(trim(email)) > 0
+    and exists (
+      select 1
+      from public.events
+      where events.id = event_id
+        and events.title = event_title
+        and events.is_published
+        and events.event_date > now()
+    )
+  );
+create policy "members and admins read event registrations"
+  on public.event_registrations for select to authenticated
+  using (user_id = auth.uid() or public.is_site_admin());
+create policy "admins delete event registrations"
+  on public.event_registrations for delete to authenticated
+  using (public.is_site_admin());
+
 drop policy if exists "anyone can send" on public.messages;
 drop policy if exists "admin reads" on public.messages;
 drop policy if exists "public messages insert" on public.messages;
@@ -520,6 +557,7 @@ insert into public.site_pages (slug, title, description) values
   ('about', 'About', 'Vision, mission and values.'),
   ('team', 'Team', 'Meet the Pixel Pathfinders team.'),
   ('session', 'Sessions', 'Free Saturday sessions open to everybody.'),
+  ('cookies', 'Cookie Policy', 'How Pixel Pathfinders uses cookies and browser storage.'),
   ('project', 'Projects', 'Projects built by Pixel Pathfinders.'),
   ('gallery', 'Gallery', 'Photos from sessions, training and events.'),
   ('contact', 'Contact', 'Contact Pixel Pathfinders.'),
@@ -580,7 +618,8 @@ insert into public.site_navigation_items (location, label, href, sort_order, is_
   ('footer', 'Contact', 'contact.html', 8, false),
   ('legal', 'Privacy Policy', 'privacy.html', 1, false),
   ('legal', 'Terms and Conditions', 'terms.html', 2, false),
-  ('legal', 'Become a member', 'join.html', 3, false)
+  ('legal', 'Cookie Policy', 'cookies.html', 3, false),
+  ('legal', 'Become a member', 'join.html', 4, false)
 on conflict (location, href) do nothing;
 
 insert into public.site_content (page_slug, content_key, label, value, input_type, sort_order) values

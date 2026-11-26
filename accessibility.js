@@ -21,17 +21,19 @@
   const root = document.documentElement;
   const preferences = { textSize: 0, highContrast: false, reduceMotion: false };
 
-  try {
-    const storedPreferences = localStorage.getItem(storageKey);
-    const saved = storedPreferences ? JSON.parse(storedPreferences) : {};
-    if (saved && typeof saved === "object") {
-      if ([0, 1, 2].includes(saved.textSize))
-        preferences.textSize = saved.textSize;
-      preferences.highContrast = saved.highContrast === true;
-      preferences.reduceMotion = saved.reduceMotion === true;
+  if (window.SiteCookieConsent?.allowsFunctionalPreferences()) {
+    try {
+      const storedPreferences = localStorage.getItem(storageKey);
+      const saved = storedPreferences ? JSON.parse(storedPreferences) : {};
+      if (saved && typeof saved === "object") {
+        if ([0, 1, 2].includes(saved.textSize))
+          preferences.textSize = saved.textSize;
+        preferences.highContrast = saved.highContrast === true;
+        preferences.reduceMotion = saved.reduceMotion === true;
+      }
+    } catch (error) {
+      console.warn("Could not load accessibility preferences:", error);
     }
-  } catch (error) {
-    console.warn("Could not load accessibility preferences:", error);
   }
 
   function applyPreferences() {
@@ -53,12 +55,14 @@
   applyPreferences();
 
   function savePreferences() {
+    if (!window.SiteCookieConsent?.allowsFunctionalPreferences())
+      return "not-allowed";
     try {
       localStorage.setItem(storageKey, JSON.stringify(preferences));
-      return true;
+      return "saved";
     } catch (error) {
       console.warn("Could not save accessibility preferences:", error);
-      return false;
+      return "unavailable";
     }
   }
 
@@ -115,10 +119,16 @@
       }
 
       applyPreferences();
-      const saved = savePreferences();
-      widget.querySelector(".a11y-status").textContent = saved
-        ? "Accessibility settings updated."
-        : "Settings updated for this visit, but could not be saved.";
+      const saveResult = savePreferences();
+      const message =
+        saveResult === "saved"
+          ? "Accessibility settings updated."
+          : saveResult === "not-allowed"
+            ? "Settings apply for this visit. Allow functional preferences in Cookie settings to save them."
+            : "Settings apply for this visit, but browser storage is unavailable.";
+      const status = widget.querySelector(".a11y-status");
+      status.textContent = message;
+      status.className = `a11y-status ${saveResult === "unavailable" ? "err" : "ok"}`;
     });
   }
 
